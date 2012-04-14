@@ -82,33 +82,11 @@ function _ReadTokenData($filepath = QBOX_TOKEN_TMP_FILE){
 }
 
 /**
- * Check account host is OK or not
- */
-function Ping($host, $port=443, $timeout=5) {
-    $fsock = fsockopen($host, $port, $errno, $errstr, $timeout);
-    return !$fsock ? false : true;
-}
-
-/**
- * get account auth url
- */
-function FetchAuthUrl() {
-    $hostList = explode('|', \QBox\TOKEN_HOST_LIST);
-    foreach ($hostList as $host) {
-        if (!empty($host) && \QBox\OAuth2\Ping($host, \QBox\TOKEN_HOST_PORT)){
-            return sprintf(\QBox\TOKEN_ENDPOINT_FORMAT, $host);
-            break;
-        }
-    }
-    return \QBox\TOKEN_ENDPOINT;
-}
-
-/**
  * Login by username & password
  */
 function ExchangeByPassword($client, $user, $passwd, $devid = '') {
 	$params = array('username' => $user, 'password' => $passwd, 'device_id' => $devid);
-	$response = $client->getAccessToken(\QBox\OAuth2\FetchAuthUrl(), 'password', $params);
+	$response = $client->getAccessToken(\QBox\TOKEN_ENDPOINT, 'password', $params);
 	return exchangeRet($client, $response);
 }
 
@@ -117,7 +95,7 @@ function ExchangeByPassword($client, $user, $passwd, $devid = '') {
  */
 function ExchangeByRefreshToken($client, $token) {
 	$params = array('refresh_token' => $token);
-	$response = $client->getAccessToken(\QBox\OAuth2\FetchAuthUrl(), 'refresh_token', $params);
+	$response = $client->getAccessToken(\QBox\TOKEN_ENDPOINT, 'refresh_token', $params);
 	return exchangeRet($client, $response);
 }
 

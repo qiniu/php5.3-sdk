@@ -20,7 +20,7 @@
  * This client is based on the OAuth2 specification draft v2.15
  * http://tools.ietf.org/html/draft-ietf-oauth-v2-15
  *
- * @author      Pierrick Charron <pierrick@webstart.fr>, Anis BEREJEB <anis.berejeb@gmail.com> 
+ * @author      Pierrick Charron <pierrick@webstart.fr>, Anis BEREJEB <anis.berejeb@gmail.com>
  * @version     1.0
  */
 namespace OAuth2;
@@ -33,11 +33,11 @@ class Client
     const AUTH_TYPE_URI                 = 0;
     const AUTH_TYPE_AUTHORIZATION_BASIC = 1;
     const AUTH_TYPE_FORM                = 2;
-    
+
     /**
      * Different Access token type
      */
-    const ACCESS_TOKEN_URI      = 0;   
+    const ACCESS_TOKEN_URI      = 0;
     const ACCESS_TOKEN_BEARER   = 1;
     const ACCESS_TOKEN_OAUTH    = 2;
     const ACCESS_TOKEN_MAC      = 3;
@@ -58,7 +58,7 @@ class Client
     const HTTP_METHOD_PUT    = 'PUT';
     const HTTP_METHOD_DELETE = 'DELETE';
     const HTTP_METHOD_HEAD   = 'HEAD';
-    
+
     /**
      * HTTP Form content types
      */
@@ -67,21 +67,21 @@ class Client
 
     /**
      * Client ID
-     * 
+     *
      * @var string
      */
     protected $client_id = null;
 
     /**
      * Client Secret
-     * 
+     *
      * @var string
      */
     protected $client_secret = null;
 
     /**
      * Client Authentication method
-     * 
+     *
      * @var int
      */
     protected $client_auth = self::AUTH_TYPE_URI;
@@ -113,7 +113,7 @@ class Client
      * @var string
      */
     protected $access_token_algorithm = null;
-    
+
     /**
      * Access Token Parameter name
      *
@@ -122,8 +122,8 @@ class Client
     protected $access_token_param_name = 'access_token';
 
     /**
-     * Construct 
-     * 
+     * Construct
+     *
      * @param string $client_id Client ID
      * @param string $client_secret Client Secret
      * @param int    $client_auth (AUTH_TYPE_URI, AUTH_TYPE_AUTHORIZATION_BASIC, AUTH_TYPE_FORM)
@@ -133,12 +133,12 @@ class Client
         if (!extension_loaded('curl')) {
             throw new \Exception('The PHP exention curl must be installed to use this library.');
         }
-        
+
         $this->client_id     = $client_id;
         $this->client_secret = $client_secret;
         $this->client_auth   = $client_auth;
     }
-    
+
     /**
      * getAuthenticationUrl
      *
@@ -156,7 +156,7 @@ class Client
         ));
         return $auth_endpoint . '?' . http_build_query($parameters, null, '&');
     }
-    
+
     /**
      * getAccessToken
      *
@@ -199,7 +199,8 @@ class Client
                 break;
         }
 
-        return $this->executeRequest($token_endpoint, $parameters, self::HTTP_METHOD_POST, $http_headers, self::HTTP_FORM_CONTENT_TYPE_APPLICATION);
+        #return $this->executeRequest($token_endpoint, $parameters, self::HTTP_METHOD_POST, $http_headers, self::HTTP_FORM_CONTENT_TYPE_APPLICATION);
+        return $this->executeRequestSafely($token_endpoint, $parameters, self::HTTP_METHOD_POST, $http_headers, self::HTTP_FORM_CONTENT_TYPE_APPLICATION);
     }
 
     /**
@@ -215,7 +216,7 @@ class Client
 
     /**
      * Set the client authentication type
-     * 
+     *
      * @param string $client_auth (AUTH_TYPE_URI, AUTH_TYPE_AUTHORIZATION_BASIC, AUTH_TYPE_FORM)
      * @return void
      */
@@ -242,7 +243,7 @@ class Client
 
     /**
      * Fetch a protected ressource
-     * 
+     *
      * @param string $protected_ressource_url Protected resource URL
      * @param array  $parameters Array of parameters
      * @param string $http_method HTTP Method to use (POST, PUT, GET, HEAD, DELETE)
@@ -275,12 +276,12 @@ class Client
                     break;
             }
         }
-        return $this->executeRequest(
-			$protected_resource_url, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options);
+        #return $this->executeRequest($protected_resource_url, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options);
+        return $this->executeRequestSafely($protected_resource_url, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options);
     }
 
     /**
-     * Generate the MAC signature 
+     * Generate the MAC signature
      *
      * @param string $url Called URL
      * @param array  $parameters Parameters
@@ -294,14 +295,14 @@ class Client
         $query_parameters = array();
         $body_hash = '';
         $parsed_url = parse_url($url);
-        if (!isset($parsed_url['port'])) 
+        if (!isset($parsed_url['port']))
         {
             $parsed_url['port'] = ($parsed_url['scheme'] == 'https') ? 443 : 80;
         }
 
         if (self::HTTP_METHOD_POST === $http_method || self::HTTP_METHOD_PUT === $http_method)
         {
-            if ($parameters) 
+            if ($parameters)
             {
                 $body_hash = base64_encode(hash($this->access_token_algorithm, $parameters));
             }
@@ -315,12 +316,12 @@ class Client
             sort($query_parameters);
         }
 
-        $signature = base64_encode(hash_hmac($this->access_token_algorithm, 
+        $signature = base64_encode(hash_hmac($this->access_token_algorithm,
                     $this->access_token . "\n"
-                    . $timestamp . "\n" 
-                    . $nonce . "\n" 
+                    . $timestamp . "\n"
+                    . $nonce . "\n"
                     . $body_hash . "\n"
-                    . $http_method . "\n" 
+                    . $http_method . "\n"
                     . $parsed_url['host'] . "\n"
                     . $parsed_url['port'] . "\n"
                     . $parsed_url['path'] . "\n"
@@ -331,26 +332,46 @@ class Client
     }
 
     /**
-     * Execute a request (with curl)
+     * Build a url from some url parsed parts
+     */
+    private function buildURL($parsed) {
+        $url = '';
+        if (isset($parsed["scheme"]) && isset($parsed["host"])) {
+            $url = $parsed["scheme"] . "://" . $parsed["host"];
+            if (isset($parsed["path"])) {
+                $url .= $parsed["path"];
+            }
+            if (isset($parsed["query"])) {
+                $url .= '?' . $parsed["query"];
+            }
+            if (isset($parsed["fragment"])) {
+                $url .= '#' . $parsed["fragment"];
+            }
+        }
+        return $url;
+    }
+
+    /**
+     * Execute a request safely (with curl)
      *
      * @param string $url URL
      * @param mixed  $parameters Array of parameters
      * @param string $http_method HTTP Method
      * @param array  $http_headers HTTP Headers
      * @param int    $form_content_type HTTP form content type to use
-     * @return array 
+     * @return array
      */
-    private function executeRequest($url, $parameters = '' /* array() */, $http_method = self::HTTP_METHOD_GET, $http_headers = null, $form_content_type = self::HTTP_FORM_CONTENT_TYPE_MULTIPART, $curl_extra_options = null)
+    private function executeRequestSafely($url, $parameters = '' /* array() */, $http_method = self::HTTP_METHOD_GET, $http_headers = null, $form_content_type = self::HTTP_FORM_CONTENT_TYPE_MULTIPART, $curl_extra_options = null, $i = 0)
     {
         $curl_options = array(
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_CUSTOMREQUEST  => $http_method
-                );
-		if (!empty($curl_extra_options)) {
-			foreach ($curl_extra_options as $k => $v)
-				$curl_options[$k] = $v;
-		}
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_CUSTOMREQUEST  => $http_method
+        );
+        if (!empty($curl_extra_options)) {
+            foreach ($curl_extra_options as $k => $v)
+                $curl_options[$k] = $v;
+        }
 
         switch($http_method)
         {
@@ -359,17 +380,17 @@ class Client
                 /* No break */
             case self::HTTP_METHOD_PUT:
                 /**
-                 * Passing an array to CURLOPT_POSTFIELDS will encode the data as multipart/form-data, 
+                 * Passing an array to CURLOPT_POSTFIELDS will encode the data as multipart/form-data,
                  * while passing a URL-encoded string will encode the data as application/x-www-form-urlencoded.
                  * http://php.net/manual/en/function.curl-setopt.php
                  */
                 if (!isset($curl_options[CURLOPT_UPLOAD])) {
-					if (self::HTTP_FORM_CONTENT_TYPE_APPLICATION === $form_content_type) {
-						if (is_array($parameters))
-							$parameters = http_build_query($parameters);
-					}
-					$curl_options[CURLOPT_POSTFIELDS] = $parameters;
-		        }
+                    if (self::HTTP_FORM_CONTENT_TYPE_APPLICATION === $form_content_type) {
+                        if (is_array($parameters))
+                            $parameters = http_build_query($parameters);
+                    }
+                    $curl_options[CURLOPT_POSTFIELDS] = $parameters;
+                }
                 break;
             case self::HTTP_METHOD_HEAD:
                 $curl_options[CURLOPT_NOBODY] = true;
@@ -384,7 +405,115 @@ class Client
 
         $curl_options[CURLOPT_URL] = $url;
 
-        if (is_array($http_headers)) 
+        if (is_array($http_headers))
+        {
+            $header = array();
+            foreach($http_headers as $key => $parsed_urlvalue) {
+                $header[] = "$key: $parsed_urlvalue";
+            }
+            $curl_options[CURLOPT_HTTPHEADER] = $header;
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, $curl_options);
+        $result = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        curl_close($ch);
+
+        # retry, max request 3 times
+        # acc, acc2, acc3
+        if ($errno > 0) {
+            $i += 1;
+            $parsed = parse_url($url);
+            $domains = explode('.', $parsed['host']);
+            $n = substr($domains[0], -1);
+            if (is_numeric($n)) {
+                $n = (int)$n;
+                $prefix = substr($domains[0], 0, -1);
+            } else {
+                $n = 1;
+                $prefix = $domains[0];
+            }
+            $n = $n > 2 ? 1 : $n + 1;
+            if ($i < 3) {
+                $domains[0] = ($n == 1) ? $prefix : ($prefix . $n);
+                $newhost = implode('.', $domains);
+                $parsed["host"] = $newhost;
+                $newurl = $this->buildURL($parsed);
+                return $this->executeRequestSafely($newurl, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options, $i);
+            }
+        }
+
+        if ($content_type === "application/json") {
+            $json_decode = json_decode($result, true);
+        } else {
+            $json_decode = null;
+        }
+        return array(
+            'result' => (null === $json_decode) ? $result : $json_decode,
+            'code' => $http_code,
+            'content_type' => $content_type
+        );
+    }
+
+
+    /**
+     * Execute a request (with curl)
+     *
+     * @param string $url URL
+     * @param mixed  $parameters Array of parameters
+     * @param string $http_method HTTP Method
+     * @param array  $http_headers HTTP Headers
+     * @param int    $form_content_type HTTP form content type to use
+     * @return array
+     */
+    private function executeRequest($url, $parameters = '' /* array() */, $http_method = self::HTTP_METHOD_GET, $http_headers = null, $form_content_type = self::HTTP_FORM_CONTENT_TYPE_MULTIPART, $curl_extra_options = null)
+    {
+        $curl_options = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_CUSTOMREQUEST  => $http_method
+        );
+        if (!empty($curl_extra_options)) {
+            foreach ($curl_extra_options as $k => $v)
+                $curl_options[$k] = $v;
+        }
+
+        switch($http_method)
+        {
+            case self::HTTP_METHOD_POST:
+                $curl_options[CURLOPT_POST] = true;
+                /* No break */
+            case self::HTTP_METHOD_PUT:
+                /**
+                 * Passing an array to CURLOPT_POSTFIELDS will encode the data as multipart/form-data,
+                 * while passing a URL-encoded string will encode the data as application/x-www-form-urlencoded.
+                 * http://php.net/manual/en/function.curl-setopt.php
+                 */
+                if (!isset($curl_options[CURLOPT_UPLOAD])) {
+                    if (self::HTTP_FORM_CONTENT_TYPE_APPLICATION === $form_content_type) {
+                        if (is_array($parameters))
+                            $parameters = http_build_query($parameters);
+                    }
+                    $curl_options[CURLOPT_POSTFIELDS] = $parameters;
+                }
+                break;
+            case self::HTTP_METHOD_HEAD:
+                $curl_options[CURLOPT_NOBODY] = true;
+                /* No break */
+            case self::HTTP_METHOD_DELETE:
+            case self::HTTP_METHOD_GET:
+                $url .= '?' . http_build_query($parameters, null, '&');
+                break;
+            default:
+                break;
+        }
+
+        $curl_options[CURLOPT_URL] = $url;
+
+        if (is_array($http_headers))
         {
             $header = array();
             foreach($http_headers as $key => $parsed_urlvalue) {
@@ -400,16 +529,16 @@ class Client
         $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
 
-		if ($content_type === "application/json") {
-	        $json_decode = json_decode($result, true);
+        if ($content_type === "application/json") {
+            $json_decode = json_decode($result, true);
         } else {
-        	$json_decode = null;
+            $json_decode = null;
         }
         return array(
-                'result' => (null === $json_decode) ? $result : $json_decode,
-                'code' => $http_code,
-                'content_type' => $content_type
-                );
+            'result' => (null === $json_decode) ? $result : $json_decode,
+            'code' => $http_code,
+            'content_type' => $content_type
+        );
     }
 
     /**
@@ -425,7 +554,7 @@ class Client
 
     /**
      * Converts the class name to camel case
-     * 
+     *
      * @param  mixed  $grant_type  the grant type
      * @return string
      */
