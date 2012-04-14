@@ -403,8 +403,6 @@ class Client
                 break;
         }
 
-        $curl_options[CURLOPT_URL] = $url;
-
         if (is_array($http_headers))
         {
             $header = array();
@@ -412,6 +410,26 @@ class Client
                 $header[] = "$key: $parsed_urlvalue";
             }
             $curl_options[CURLOPT_HTTPHEADER] = $header;
+        }
+
+        $curl_options[CURLOPT_URL] = $url;
+
+        $parsed = parse_url($url);
+        $domains = explode('.', $parsed['host']);
+        $n = substr($domains[0], -1);
+        if (is_numeric($n)) {
+            $n = (int)$n;
+            $prefix = substr($domains[0], 0, -1);
+        } else {
+            $n = 1;
+            $prefix = $domains[0];
+        }
+        $tmphosts = sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.qbox_' . $prefix;
+        if (file_exists($tmphosts)) {
+            if ($hoststr = file_get_contents($tmphosts)){
+                $parsed["host"] = $hoststr;
+                $curl_options[CURLOPT_URL] = $this->buildURL($parsed);
+            }
         }
 
         $ch = curl_init();
@@ -426,16 +444,6 @@ class Client
         # acc, acc2, acc3
         if ($errno > 0) {
             $i += 1;
-            $parsed = parse_url($url);
-            $domains = explode('.', $parsed['host']);
-            $n = substr($domains[0], -1);
-            if (is_numeric($n)) {
-                $n = (int)$n;
-                $prefix = substr($domains[0], 0, -1);
-            } else {
-                $n = 1;
-                $prefix = $domains[0];
-            }
             $n = $n > 2 ? 1 : $n + 1;
             if ($i < 3) {
                 $domains[0] = ($n == 1) ? $prefix : ($prefix . $n);
@@ -444,6 +452,10 @@ class Client
                 $newurl = $this->buildURL($parsed);
                 return $this->executeRequestSafely($newurl, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options, $i);
             }
+        }
+
+        if ($i > 0 && $i < 3) {
+            file_put_contents($tmphosts, $parsed['host'], LOCK_EX);
         }
 
         if ($content_type === "application/json") {
