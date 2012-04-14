@@ -12,6 +12,10 @@ const REDIRECT_URI           = '<RedirectURL>';
 const AUTHORIZATION_ENDPOINT = '<AuthURL>';
 const TOKEN_ENDPOINT         = 'https://acc.qbox.me/oauth2/token';
 
+const TOKEN_ENDPOINT_FORMAT  = 'https://%s/oauth2/token';
+const TOKEN_HOST_LIST = 'acc.qbox.me|acc2.qbox.me|acc3.qbox.me';
+const TOKEN_HOST_PORT = '443';
+
 //
 // QBox
 

@@ -2,10 +2,10 @@
 
 namespace QBox\OAuth2;
 
-require('oauth/Client.php');
-require('oauth/GrantType/IGrantType.php');
-require('oauth/GrantType/Password.php');
-require('oauth/GrantType/RefreshToken.php');
+require('oauth2/Client.php');
+require('oauth2/GrantType/IGrantType.php');
+require('oauth2/GrantType/Password.php');
+require('oauth2/GrantType/RefreshToken.php');
 
 require_once('config.php');
 
@@ -13,7 +13,6 @@ require_once('config.php');
  * New OAuth2 Client
  */
 function NewClient() {
-
 	$client = new \OAuth2\Client(\QBox\CLIENT_ID, \QBox\CLIENT_SECRET);
 	$client->setAccessTokenType($client::ACCESS_TOKEN_BEARER);
 	return $client;
@@ -23,8 +22,6 @@ function NewClient() {
  * Internal func
  */
 function exchangeRet($client, $response) {
-
-//	var_dump($response);
 	$code = $response['code'];
 	$result = $response['result'];
 	if ($code === 200) {
@@ -85,12 +82,33 @@ function _ReadTokenData($filepath = QBOX_TOKEN_TMP_FILE){
 }
 
 /**
+ * Check account host is OK or not
+ */
+function Ping($host, $port=443, $timeout=5) {
+    $fsock = fsockopen($host, $port, $errno, $errstr, $timeout);
+    return !$fsock ? false : true;
+}
+
+/**
+ * get account auth url
+ */
+function FetchAuthUrl() {
+    $hostList = explode('|', \QBox\TOKEN_HOST_LIST);
+    foreach ($hostList as $host) {
+        if (!empty($host) && \QBox\OAuth2\Ping($host, \QBox\TOKEN_HOST_PORT)){
+            return sprintf(\QBox\TOKEN_ENDPOINT_FORMAT, $host);
+            break;
+        }
+    }
+    return \QBox\TOKEN_ENDPOINT;
+}
+
+/**
  * Login by username & password
  */
 function ExchangeByPassword($client, $user, $passwd, $devid = '') {
-
 	$params = array('username' => $user, 'password' => $passwd, 'device_id' => $devid);
-	$response = $client->getAccessToken(\QBox\TOKEN_ENDPOINT, 'password', $params);
+	$response = $client->getAccessToken(\QBox\OAuth2\FetchAuthUrl(), 'password', $params);
 	return exchangeRet($client, $response);
 }
 
@@ -98,9 +116,8 @@ function ExchangeByPassword($client, $user, $passwd, $devid = '') {
  * Login by refreshToken
  */
 function ExchangeByRefreshToken($client, $token) {
-
 	$params = array('refresh_token' => $token);
-	$response = $client->getAccessToken(\QBox\TOKEN_ENDPOINT, 'refresh_token', $params);
+	$response = $client->getAccessToken(\QBox\OAuth2\FetchAuthUrl(), 'refresh_token', $params);
 	return exchangeRet($client, $response);
 }
 
@@ -108,7 +125,6 @@ function ExchangeByRefreshToken($client, $token) {
  * func Call(client *Client, url string) => (result array, code int, err Error)
  */
 function Call($client, $url) {
-
 	$response = $client->fetch($url, array(), $client::HTTP_METHOD_POST, null, $client::HTTP_FORM_CONTENT_TYPE_APPLICATION);
 	$code = $response['code'];
 	if ($code === 200) {
@@ -121,7 +137,6 @@ function Call($client, $url) {
  * func CallWithParams(client *Client, url string, params stringOrArray) => (result array, code int, err Error)
  */
 function CallWithParams($client, $url, $params) {
-
 	$response = $client->fetch($url, $params, $client::HTTP_METHOD_POST, null, $client::HTTP_FORM_CONTENT_TYPE_APPLICATION);
 	$code = $response['code'];
 	if ($code === 200 || $code === 298) {
@@ -134,7 +149,6 @@ function CallWithParams($client, $url, $params) {
  * func CallNoRet(client *Client, url string) => (code int, err Error)
  */
 function CallNoRet($client, $url) {
-
 	$response = $client->fetch($url, array(), $client::HTTP_METHOD_POST, null, $client::HTTP_FORM_CONTENT_TYPE_APPLICATION);
 	$code = $response['code'];
 	if ($code === 200) {
@@ -147,7 +161,6 @@ function CallNoRet($client, $url) {
  * func CallWithBinary(client *Client, url string, fp File, bytes int64, timeout int) => (result array, code int, err Error)
  */
 function CallWithBinary($client, $url, $fp, $bytes, $timeout) {
-
 	$http_headers = array('Content-Type: application/octet-stream');
 	$curl_options = array(
 		CURLOPT_UPLOAD => true,
