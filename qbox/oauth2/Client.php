@@ -122,13 +122,22 @@ class Client
     protected $access_token_param_name = 'access_token';
 
     /**
+     * The path to the certificate file to use for https connections
+     *
+     * @var string  Defaults to .
+     */
+    protected $certificate_file = null;
+
+    /**
      * Construct
      *
      * @param string $client_id Client ID
      * @param string $client_secret Client Secret
      * @param int    $client_auth (AUTH_TYPE_URI, AUTH_TYPE_AUTHORIZATION_BASIC, AUTH_TYPE_FORM)
+     * @param string $certificate_file Indicates if we want to use a certificate file to trust the server. Optional, defaults to null.
+     * @return void
      */
-    public function __construct($client_id, $client_secret, $client_auth = self::AUTH_TYPE_URI)
+    public function __construct($client_id, $client_secret, $client_auth = self::AUTH_TYPE_URI, $certificate_file = null)
     {
         if (!extension_loaded('curl')) {
             throw new \Exception('The PHP exention curl must be installed to use this library.');
@@ -137,6 +146,10 @@ class Client
         $this->client_id     = $client_id;
         $this->client_secret = $client_secret;
         $this->client_auth   = $client_auth;
+        $this->certificate_file = $certificate_file;
+        if (!empty($this->certificate_file)  && !is_file($this->certificate_file)) {
+            throw new \Exception('The certificate file was not found');
+        }
     }
 
     /**
@@ -437,6 +450,16 @@ class Client
 
         $ch = curl_init();
         curl_setopt_array($ch, $curl_options);
+        // https handling
+        if (!empty($this->certificate_file)) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_CAINFO, $this->certificate_file);
+        } else {
+            // bypass ssl verification
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
+        }
         $result = curl_exec($ch);
         $errno = curl_errno($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -539,6 +562,16 @@ class Client
 
         $ch = curl_init();
         curl_setopt_array($ch, $curl_options);
+        // https handling
+        if (!empty($this->certificate_file)) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_CAINFO, $this->certificate_file);
+        } else {
+            // bypass ssl verification
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
+        }
         $result = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
