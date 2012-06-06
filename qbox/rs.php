@@ -68,7 +68,7 @@ class Service
 		$entryURI = $this->TableName . ':' . $key;
 		$url = \QBox\IO_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
         if ($customMeta !== '') {
-            $action .= '/meta/' . \QBox\Encode($customMeta);
+            $url .= '/meta/' . \QBox\Encode($customMeta);
         }
         if ($crc32i > 0) {
             $url .= '/crc32/' . $crc32i;
