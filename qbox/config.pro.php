@@ -21,6 +21,9 @@ const IO_HOST = 'http://io.qbox.me';
 const FS_HOST = 'https://fs.qbox.me';
 const RS_HOST = 'http://rs.qbox.me:10100';
 
+// crc32 32bit limitation
+const CRC32_LIMIT_SIZE = 2147483648; // 2GB
+
 //
 // Demo
 
