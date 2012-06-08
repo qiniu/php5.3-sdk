@@ -17,7 +17,7 @@ const TOKEN_ENDPOINT         = 'https://acc.qbox.me/oauth2/token';
 
 const PUT_TIMEOUT = 300000; // 300s = 5m
 
-const IO_HOST = 'http://io.qbox.me';
+const IO_HOST = 'http://iovip.qbox.me';
 const FS_HOST = 'https://fs.qbox.me';
 const RS_HOST = 'http://rs.qbox.me:10100';
 
