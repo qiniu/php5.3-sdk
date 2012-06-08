@@ -25,6 +25,15 @@ if ($code != 200) {
 $tblName = 'tblName';
 $rs = QBox\RS\NewService($client, $tblName);
 
+list($code, $error) = $rs->Drop();
+echo "===> Drop table result:\n";
+if ($code == 200) {
+    echo "Drop ok!\n";
+} else {
+    $msg = QBox\ErrorMessage($code, $error);
+    echo "Drop failed: $code - $msg\n";
+}
+
 $key = 'put_demo.php';
 $localFile = __FILE__;
 
@@ -38,7 +47,7 @@ if ($code == 200) {
 	exit(-1);
 }
 
-list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key, '', $localFile, '', array('key' => $key));
+list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key, '', $localFile, 'CustomData', array('key' => $key), true);
 echo "===> PutFile $key result:\n";
 if ($code == 200) {
 	var_dump($result);

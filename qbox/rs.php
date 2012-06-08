@@ -58,44 +58,6 @@ class Service
 	}
 
 	/**
-	 * func PutWithCRC32(key string, mimeType string, fp File, bytes int64, customMeta string, crc32i int, timeout int) => (data PutRet, code int, err Error)
-	 * 上传一个流
-	 */
-	public function PutWithCRC32($key, $mimeType, $fp, $bytes, $customMeta = '', $crc32i = 0, $timeout = \QBox\PUT_TIMEOUT) {
-		if ($mimeType === '') {
-			$mimeType = 'application/octet-stream';
-		}
-		$entryURI = $this->TableName . ':' . $key;
-		$url = \QBox\IO_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
-        if ($customMeta !== '') {
-            $url .= '/meta/' . \QBox\Encode($customMeta);
-        }
-        if ($crc32i > 0) {
-            $url .= '/crc32/' . $crc32i;
-        }
-		return \QBox\OAuth2\CallWithBinary($this->Conn, $url, $fp, $bytes, $timeout);
-	}
-
-	/**
-	 * func PutFileWithCRC32(key string, mimeType string, localFile string, customMeta string, crc32CheckEnable boolean, timeout int) => (data PutRet, code int, err Error)
-	 * 上传文件
-	 */
-	public function PutFileWithCRC32($key, $mimeType, $localFile, $customMeta = '', $crc32CheckEnable = false, $timeout = \QBox\PUT_TIMEOUT) {
-		$fp = fopen($localFile, 'rb');
-		if (!$fp) {
-			return array(null, -1, array('error' => 'open file failed'));
-        }
-		$fileStat = fstat($fp);
-		$fileSize = $fileStat['size'];
-        if ($crc32CheckEnable && $fileSize < \QBox\CRC32_LIMIT_SIZE){
-            $crc32i = \QBox\CalFileCRC32Sum($localFile);
-        }
-		$result = $this->PutWithCRC32($key, $mimeType, $fp, $fileSize, $customMeta, $crc32i, $timeout);
-		fclose($fp);
-		return $result;
-	}
-
-	/**
 	 * func Get(key string, attName string) => (data GetRet, code int, err Error)
 	 * 下载授权（生成一个短期有效的可匿名下载URL）
 	 * attName为可选参数
