@@ -2,7 +2,7 @@
 
 namespace QBox\RS;
 
-require_once('oauth.php');
+require_once('oauth2.php');
 require_once('utils.php');
 
 /**
@@ -47,8 +47,9 @@ class Service
 	 */
 	public function PutFile($key, $mimeType, $localFile, $timeout = \QBox\PUT_TIMEOUT) {
 		$fp = fopen($localFile, 'rb');
-		if (!$fp)
+		if (!$fp) {
 			return array(null, -1, array('error' => 'open file failed'));
+        }
 		$fileStat = fstat($fp);
 		$fileSize = $fileStat['size'];
 		$result = $this->Put($key, $mimeType, $fp, $fileSize, $timeout);
@@ -101,7 +102,7 @@ class Service
 		$url = \QBox\RS_HOST . '/batch';
 		return \QBox\OAuth2\CallWithParams($this->Conn, $url, $ops);
 	}
-	
+
 	/**
 	 * func GetIfNotModified(key string, attName string, base string) => (data GetRet, code int, err Error)
 	 * 下载授权（生成一个短期有效的可匿名下载URL），如果服务端文件没被人修改的话（用于断点续传）

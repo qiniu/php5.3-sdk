@@ -21,6 +21,9 @@ const IO_HOST = 'http://127.0.0.1:9876';
 const FS_HOST = 'http://127.0.0.1:9872';
 const RS_HOST = 'http://127.0.0.1:9875';
 
+// crc32 32bit limitation
+const CRC32_LIMIT_SIZE = 2147483648; // 2GB
+
 //
 // Demo
 
