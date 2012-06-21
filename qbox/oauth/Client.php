@@ -41,6 +41,7 @@ class Client
     const ACCESS_TOKEN_BEARER   = 1;
     const ACCESS_TOKEN_OAUTH    = 2;
     const ACCESS_TOKEN_MAC      = 3;
+    const ACCESS_TOKEN_QBOX	= 4;
 
     /**
     * Different Grant types
@@ -92,6 +93,13 @@ class Client
      * @var string
      */
     protected $access_token = null;
+    
+    
+    /**
+     * Access Token Key
+     * @var string
+     */
+     protected $access_token_key;
 
     /**
      * Access Token Type
@@ -233,11 +241,12 @@ class Client
      * @param string $algorithm Algorithm used to encrypt the signature
      * @return void
      */
-    public function setAccessTokenType($type, $secret = null, $algorithm = null)
+    public function setAccessTokenType($type, $secret = null, $algorithm = null,$key = null)
     {
         $this->access_token_type = $type;
         $this->access_token_secret = $secret;
         $this->access_token_algorithm = $algorithm;
+        $this->access_token_key = $key;
     }
 
     /**
@@ -252,7 +261,7 @@ class Client
      */
     public function fetch($protected_resource_url, $parameters = '' /* array() */, $http_method = self::HTTP_METHOD_GET, $http_headers = null, $form_content_type = self::HTTP_FORM_CONTENT_TYPE_MULTIPART, $curl_extra_options = null)
     {
-        if ($this->access_token)
+        if ($this->access_token || $this->access_token_type == self::ACCESS_TOKEN_QBOX)
         {
             switch ($this->access_token_type)
             {
@@ -270,13 +279,42 @@ class Client
                 case self::ACCESS_TOKEN_MAC:
                     $http_headers['Authorization'] = 'MAC ' . $this->generateMACSignature($protected_resource_url, $parameters, $http_method);
                     break;
+                case self::ACCESS_TOKEN_QBOX:
+			$http_headers['Authorization'] = 'QBox ' . $this->generateQBOXSignature($protected_resource_url,$parameters);
+                	break;
                 default:
                     throw new Exception('Unknown access token type.');
                     break;
-            }
+            }	
         }
         return $this->executeRequest(
 			$protected_resource_url, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options);
+    } 
+    
+    /**
+     * Generate the QBOX signature
+     * @param string $url Called URL 
+     */
+    private function generateQBOXSignature($url,$parameters){
+		$parsed_url = parse_url($url);
+		$path = $parsed_url['path'];
+		$query = $parsed_url['query'];
+		$data = $path;
+		if ($query != "") {
+			$data .= "?" . $query;
+		}
+		$data .= "\n";
+		
+		if($parameters){
+			if (is_array($parameters)){
+				$parameters = http_build_query($parameters);
+			}
+			$data .= $parameters;			
+		}
+		$digest = \QBox\Encode(hash_hmac(sha1,$data, $this->access_token_secret,true));
+		$digest = $this->access_token_key . ":" .$digest;
+		return $digest;
+		
     }
 
     /**
@@ -367,7 +405,7 @@ class Client
 					if (self::HTTP_FORM_CONTENT_TYPE_APPLICATION === $form_content_type) {
 						if (is_array($parameters))
 							$parameters = http_build_query($parameters);
-					}
+					}  
 					$curl_options[CURLOPT_POSTFIELDS] = $parameters;
 		        }
                 break;

@@ -6,13 +6,19 @@ require('client/rs.php');
 
 $client = QBox\OAuth2\NewClient();
 
+/*
 list($code, $result) = QBox\OAuth2\ExchangeByPasswordPermanently($client, 'test@qbox.net', 'test', QBOX_TOKEN_TMP_FILE);
 if ($code != 200) {
 	$msg = QBox\ErrorMessage($code, $result);
 	echo "Login failed: $code - $msg\n";
 	exit(-1);
-}
+}*/
 
+$client->setAccessTokenType($client::ACCESS_TOKEN_QBOX,\QBox\SECRET,null,\QBox\KEY);
+//$client->setClientAuthType($client::ACCESS_TOKEN_QBOX);
+
+//QBox\OAuth2\CallWithParams($client,"http://localhost:1234/test/",array('a'=>"1","b"=>"2"));
+//die;
 /*
 list($code, $result) = QBox\OAuth2\ExchangeByPassword($client, 'test@qbox.net', 'test');
 if ($code != 200) {
@@ -32,10 +38,10 @@ if ($code != 200) {
 $tblName = 'tblName';
 $rs = QBox\RS\NewService($client, $tblName);
 
-$key = '000-default';
+$key = '010-default';
 $friendName = 'rs_demo.php';
 
-$key2 = '000-default2';
+$key2 = '010-default2';
 $friendName2 = 'rs_demo2.php';
 
 if (false) {
