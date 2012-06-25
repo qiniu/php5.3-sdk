@@ -26,5 +26,3 @@ const RS_HOST = 'http://127.0.0.1:9875';
 
 const DEMO_DOMAIN = 'localhost:9876';
 
-// a more security path need
-define("QBOX_TOKEN_TMP_FILE", sys_get_temp_dir() . DIRECTORY_SEPARATOR . '.qbox_tokens');
