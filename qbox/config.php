@@ -1,1 +1,1 @@
-config.test.php
+config.pro.php
