@@ -9,47 +9,59 @@ $client = QBox\OAuth2\NewClient();
 $tblName = 'tblName';
 $rs = QBox\RS\NewService($client, $tblName);
 
-$key = '010-default';
+list($code, $error) = $rs->Drop();
+echo "===> Drop bucket result:\n";
+if ($code == 200) {
+	echo "Drop ok!\n";
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "Drop failed: $code - $msg\n";
+}
+
+$key = '000-default';
 $friendName = 'rs_demo.php';
 
-$key2 = '010-default2';
+$key2 = '000-default2';
 $friendName2 = 'rs_demo2.php';
 
-if (false) {
-	list($result, $code, $error) = $rs->PutFile($key, '', __FILE__);
-	echo "===> PutFile result:\n";
-	if ($code == 200) {
-		var_dump($result);
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "PutFile failed: $code - $msg\n";
-		exit(-1);
-	}
-	exit(-1);
-	list($result, $code, $error) = $rs->PutFile($key2, '', __FILE__);
+list($result, $code, $error) = $rs->PutFile($key, '', __FILE__);
+echo "===> PutFile result:\n";
+if ($code == 200) {
+	var_dump($result);
 } else {
-	list($result, $code, $error) = $rs->PutAuth();
-	echo "===> PutAuth result:\n";
-	if ($code == 200) {
-		var_dump($result);
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "PutAuth failed: $code - $msg\n";
-		exit(-1);
-	}
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "PutFile failed: $code - $msg\n";
+	exit(-1);
+}
 
-	list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key, '', __FILE__, 'CustomData', array('key' => $key));
-	echo "===> PutFile $key result:\n";
-	if ($code == 200) {
-		var_dump($result);
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "PutFile failed: $code - $msg\n";
-		exit(-1);
-	}
+list($auth, $code, $error) = $rs->PutAuth();
+echo "===> PutAuth result:\n";
+if ($code == 200) {
+	var_dump($auth);
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "PutAuth failed: $code - $msg\n";
+	exit(-1);
+}
 
-	list($result, $code, $error) = $rs->PutAuth();
-	list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key2, '', __FILE__, 'CustomData', array('key' => $key2));
+list($result, $code, $error) = QBox\RS\PutFile($auth['url'], $tblName, $key, '', __FILE__, 'CustomData', array('key' => $key));
+echo "===> PutFile $key result:\n";
+if ($code == 200) {
+	var_dump($result);
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "PutFile failed: $code - $msg\n";
+	exit(-1);
+}
+
+list($result, $code, $error) = QBox\RS\PutFile($auth['url'], $tblName, $key2, '', __FILE__, 'CustomData', array('key' => $key2));
+echo "===> PutFile $key2 result:\n";
+if ($code == 200) {
+	var_dump($result);
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "PutFile failed: $code - $msg\n";
+	exit(-1);
 }
 
 list($code, $error) = $rs->Publish(QBox\DEMO_DOMAIN);
@@ -114,24 +126,12 @@ if ($code == 200) {
 echo "===> Display $key contents:\n";
 echo file_get_contents($result['url']);
 
-$action = '';
-if ($action == 'delete') {
-	list($code, $error) = $rs->Delete($key);
-	echo "===> Delete $key result:\n";
-	if ($code == 200) {
-		echo "Delete ok!\n";
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "Delete failed: $code - $msg\n";
-	}
-} else if ($action == 'drop') {
-	list($code, $error) = $rs->Drop();
-	echo "===> Drop table result:\n";
-	if ($code == 200) {
-		echo "Drop ok!\n";
-	} else {
-		$msg = QBox\ErrorMessage($code, $error);
-		echo "Drop failed: $code - $msg\n";
-	}
+list($code, $error) = $rs->Delete($key);
+echo "===> Delete $key result:\n";
+if ($code == 200) {
+	echo "Delete ok!\n";
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "Delete failed: $code - $msg\n";
 }
 
