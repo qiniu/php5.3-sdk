@@ -20,7 +20,7 @@
  * This client is based on the OAuth2 specification draft v2.15
  * http://tools.ietf.org/html/draft-ietf-oauth-v2-15
  *
- * @author      Pierrick Charron <pierrick@webstart.fr>, Anis BEREJEB <anis.berejeb@gmail.com> 
+ * @author      Pierrick Charron <pierrick@webstart.fr>, Anis BEREJEB <anis.berejeb@gmail.com>
  * @version     1.0
  */
 namespace OAuth2;
@@ -33,15 +33,15 @@ class Client
     const AUTH_TYPE_URI                 = 0;
     const AUTH_TYPE_AUTHORIZATION_BASIC = 1;
     const AUTH_TYPE_FORM                = 2;
-    
+
     /**
      * Different Access token type
      */
-    const ACCESS_TOKEN_URI      = 0;   
+    const ACCESS_TOKEN_URI      = 0;
     const ACCESS_TOKEN_BEARER   = 1;
     const ACCESS_TOKEN_OAUTH    = 2;
     const ACCESS_TOKEN_MAC      = 3;
-    const ACCESS_TOKEN_QBOX	= 4;
+    const ACCESS_TOKEN_QBOX		= 4;
 
     /**
     * Different Grant types
@@ -59,7 +59,7 @@ class Client
     const HTTP_METHOD_PUT    = 'PUT';
     const HTTP_METHOD_DELETE = 'DELETE';
     const HTTP_METHOD_HEAD   = 'HEAD';
-    
+
     /**
      * HTTP Form content types
      */
@@ -68,21 +68,21 @@ class Client
 
     /**
      * Client ID
-     * 
+     *
      * @var string
      */
     protected $client_id = null;
 
     /**
      * Client Secret
-     * 
+     *
      * @var string
      */
     protected $client_secret = null;
 
     /**
      * Client Authentication method
-     * 
+     *
      * @var int
      */
     protected $client_auth = self::AUTH_TYPE_URI;
@@ -93,13 +93,6 @@ class Client
      * @var string
      */
     protected $access_token = null;
-    
-    
-    /**
-     * Access Token Key
-     * @var string
-     */
-     protected $access_token_key;
 
     /**
      * Access Token Type
@@ -121,7 +114,7 @@ class Client
      * @var string
      */
     protected $access_token_algorithm = null;
-    
+
     /**
      * Access Token Parameter name
      *
@@ -130,8 +123,8 @@ class Client
     protected $access_token_param_name = 'access_token';
 
     /**
-     * Construct 
-     * 
+     * Construct
+     *
      * @param string $client_id Client ID
      * @param string $client_secret Client Secret
      * @param int    $client_auth (AUTH_TYPE_URI, AUTH_TYPE_AUTHORIZATION_BASIC, AUTH_TYPE_FORM)
@@ -141,12 +134,12 @@ class Client
         if (!extension_loaded('curl')) {
             throw new \Exception('The PHP exention curl must be installed to use this library.');
         }
-        
+
         $this->client_id     = $client_id;
         $this->client_secret = $client_secret;
         $this->client_auth   = $client_auth;
     }
-    
+
     /**
      * getAuthenticationUrl
      *
@@ -164,7 +157,7 @@ class Client
         ));
         return $auth_endpoint . '?' . http_build_query($parameters, null, '&');
     }
-    
+
     /**
      * getAccessToken
      *
@@ -223,7 +216,7 @@ class Client
 
     /**
      * Set the client authentication type
-     * 
+     *
      * @param string $client_auth (AUTH_TYPE_URI, AUTH_TYPE_AUTHORIZATION_BASIC, AUTH_TYPE_FORM)
      * @return void
      */
@@ -241,17 +234,16 @@ class Client
      * @param string $algorithm Algorithm used to encrypt the signature
      * @return void
      */
-    public function setAccessTokenType($type, $secret = null, $algorithm = null,$key = null)
+    public function setAccessTokenType($type, $secret = null, $algorithm = null)
     {
         $this->access_token_type = $type;
         $this->access_token_secret = $secret;
         $this->access_token_algorithm = $algorithm;
-        $this->access_token_key = $key;
     }
 
     /**
      * Fetch a protected ressource
-     * 
+     *
      * @param string $protected_ressource_url Protected resource URL
      * @param array  $parameters Array of parameters
      * @param string $http_method HTTP Method to use (POST, PUT, GET, HEAD, DELETE)
@@ -261,10 +253,13 @@ class Client
      */
     public function fetch($protected_resource_url, $parameters = '' /* array() */, $http_method = self::HTTP_METHOD_GET, $http_headers = null, $form_content_type = self::HTTP_FORM_CONTENT_TYPE_MULTIPART, $curl_extra_options = null)
     {
-        if ($this->access_token || $this->access_token_type == self::ACCESS_TOKEN_QBOX)
+        if ($this->access_token)
         {
             switch ($this->access_token_type)
             {
+                case self::ACCESS_TOKEN_QBOX:
+			$http_headers['Authorization'] = 'QBox ' . $this->generateQBOXSignature($protected_resource_url,$parameters);
+					break;
                 case self::ACCESS_TOKEN_URI:
                 	if (is_array($parameters)) {
 	                    $parameters[$this->access_token_param_name] = $this->access_token;
@@ -279,46 +274,41 @@ class Client
                 case self::ACCESS_TOKEN_MAC:
                     $http_headers['Authorization'] = 'MAC ' . $this->generateMACSignature($protected_resource_url, $parameters, $http_method);
                     break;
-                case self::ACCESS_TOKEN_QBOX:
-			$http_headers['Authorization'] = 'QBox ' . $this->generateQBOXSignature($protected_resource_url,$parameters);
-                	break;
                 default:
                     throw new Exception('Unknown access token type.');
                     break;
-            }	
+            }
         }
         return $this->executeRequest(
 			$protected_resource_url, $parameters, $http_method, $http_headers, $form_content_type, $curl_extra_options);
-    } 
-    
+    }
+
     /**
      * Generate the QBOX signature
-     * @param string $url Called URL 
+     * @param string $url Called URL
      */
     private function generateQBOXSignature($url,$parameters){
 		$parsed_url = parse_url($url);
 		$path = $parsed_url['path'];
-		$query = $parsed_url['query'];
 		$data = $path;
-		if ($query != "") {
-			$data .= "?" . $query;
+		if (isset($parsed_url['query'])) {
+			$data .= "?" . $parsed_url['query'];
 		}
 		$data .= "\n";
-		
+
 		if($parameters){
 			if (is_array($parameters)){
 				$parameters = http_build_query($parameters);
 			}
-			$data .= $parameters;			
+			$data .= $parameters;
 		}
-		$digest = \QBox\Encode(hash_hmac(sha1,$data, $this->access_token_secret,true));
-		$digest = $this->access_token_key . ":" .$digest;
+		$digest = \QBox\Encode(hash_hmac('sha1', $data, $this->access_token_secret, true));
+		$digest = $this->access_token . ":" .$digest;
 		return $digest;
-		
     }
 
     /**
-     * Generate the MAC signature 
+     * Generate the MAC signature
      *
      * @param string $url Called URL
      * @param array  $parameters Parameters
@@ -332,14 +322,14 @@ class Client
         $query_parameters = array();
         $body_hash = '';
         $parsed_url = parse_url($url);
-        if (!isset($parsed_url['port'])) 
+        if (!isset($parsed_url['port']))
         {
             $parsed_url['port'] = ($parsed_url['scheme'] == 'https') ? 443 : 80;
         }
 
         if (self::HTTP_METHOD_POST === $http_method || self::HTTP_METHOD_PUT === $http_method)
         {
-            if ($parameters) 
+            if ($parameters)
             {
                 $body_hash = base64_encode(hash($this->access_token_algorithm, $parameters));
             }
@@ -353,12 +343,12 @@ class Client
             sort($query_parameters);
         }
 
-        $signature = base64_encode(hash_hmac($this->access_token_algorithm, 
+        $signature = base64_encode(hash_hmac($this->access_token_algorithm,
                     $this->access_token . "\n"
-                    . $timestamp . "\n" 
-                    . $nonce . "\n" 
+                    . $timestamp . "\n"
+                    . $nonce . "\n"
                     . $body_hash . "\n"
-                    . $http_method . "\n" 
+                    . $http_method . "\n"
                     . $parsed_url['host'] . "\n"
                     . $parsed_url['port'] . "\n"
                     . $parsed_url['path'] . "\n"
@@ -376,7 +366,7 @@ class Client
      * @param string $http_method HTTP Method
      * @param array  $http_headers HTTP Headers
      * @param int    $form_content_type HTTP form content type to use
-     * @return array 
+     * @return array
      */
     private function executeRequest($url, $parameters = '' /* array() */, $http_method = self::HTTP_METHOD_GET, $http_headers = null, $form_content_type = self::HTTP_FORM_CONTENT_TYPE_MULTIPART, $curl_extra_options = null)
     {
@@ -397,7 +387,7 @@ class Client
                 /* No break */
             case self::HTTP_METHOD_PUT:
                 /**
-                 * Passing an array to CURLOPT_POSTFIELDS will encode the data as multipart/form-data, 
+                 * Passing an array to CURLOPT_POSTFIELDS will encode the data as multipart/form-data,
                  * while passing a URL-encoded string will encode the data as application/x-www-form-urlencoded.
                  * http://php.net/manual/en/function.curl-setopt.php
                  */
@@ -405,7 +395,7 @@ class Client
 					if (self::HTTP_FORM_CONTENT_TYPE_APPLICATION === $form_content_type) {
 						if (is_array($parameters))
 							$parameters = http_build_query($parameters);
-					}  
+					}
 					$curl_options[CURLOPT_POSTFIELDS] = $parameters;
 		        }
                 break;
@@ -422,7 +412,7 @@ class Client
 
         $curl_options[CURLOPT_URL] = $url;
 
-        if (is_array($http_headers)) 
+        if (is_array($http_headers))
         {
             $header = array();
             foreach($http_headers as $key => $parsed_urlvalue) {
@@ -463,7 +453,7 @@ class Client
 
     /**
      * Converts the class name to camel case
-     * 
+     *
      * @param  mixed  $grant_type  the grant type
      * @return string
      */
