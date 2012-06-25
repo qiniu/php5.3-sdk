@@ -6,22 +6,6 @@ require('client/rs.php');
 
 $client = QBox\OAuth2\NewClient();
 
-list($code, $result) = QBox\OAuth2\ExchangeByPasswordPermanently($client, 'test@qbox.net', 'test', QBOX_TOKEN_TMP_FILE);
-if ($code != 200) {
-	$msg = QBox\ErrorMessage($code, $result);
-	echo "Login failed: $code - $msg\n";
-	exit(-1);
-}
-
-/*
-list($code, $result) = QBox\OAuth2\ExchangeByPassword($client, 'test@qbox.net', 'test');
-if ($code != 200) {
-	$msg = QBox\ErrorMessage($code, $result);
-	echo "Login failed: $code - $msg\n";
-	exit(-1);
-}
-*/
-
 $tblName = 'tblName';
 $rs = QBox\RS\NewService($client, $tblName);
 
