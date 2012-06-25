@@ -6,35 +6,6 @@ require('client/rs.php');
 
 $client = QBox\OAuth2\NewClient();
 
-/*
-list($code, $result) = QBox\OAuth2\ExchangeByPasswordPermanently($client, 'test@qbox.net', 'test', QBOX_TOKEN_TMP_FILE);
-if ($code != 200) {
-	$msg = QBox\ErrorMessage($code, $result);
-	echo "Login failed: $code - $msg\n";
-	exit(-1);
-}*/
-
-$client->setAccessTokenType($client::ACCESS_TOKEN_QBOX,\QBox\SECRET,null,\QBox\KEY);
-//$client->setClientAuthType($client::ACCESS_TOKEN_QBOX);
-
-//QBox\OAuth2\CallWithParams($client,"http://localhost:1234/test/",array('a'=>"1","b"=>"2"));
-//die;
-/*
-list($code, $result) = QBox\OAuth2\ExchangeByPassword($client, 'test@qbox.net', 'test');
-if ($code != 200) {
-	$msg = QBox\ErrorMessage($code, $result);
-	echo "Login failed: $code - $msg\n";
-	exit(-1);
-}
-
-list($code, $result) = QBox\OAuth2\ExchangeByRefreshToken($client, $result['refresh_token']);
-if ($code != 200) {
-	$msg = QBox\ErrorMessage($code, $result);
-	echo "LoginByRefreshToken failed: $code - $msg\n";
-	exit(-1);
-}
-*/
-
 $tblName = 'tblName';
 $rs = QBox\RS\NewService($client, $tblName);
 
@@ -81,7 +52,7 @@ if (false) {
 	list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key2, '', __FILE__, 'CustomData', array('key' => $key2));
 }
 
-list($code, $error) = $rs->Publish(QBox\DEMO_DOMAIN . '/' . $tblName);
+list($code, $error) = $rs->Publish(QBox\DEMO_DOMAIN);
 echo "===> Publish result:\n";
 if ($code == 200) {
 	echo "Publish ok!\n";
