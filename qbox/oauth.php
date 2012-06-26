@@ -14,7 +14,7 @@ require_once('config.php');
  */
 function NewClient() {
 
-	$client = new \OAuth2\Client("27439468822db094aa2116c0bb93728c24665daa", "3da7950db65a488fed7a3585c7e7d6d2fb19f38f");
+	$client = new \OAuth2\Client("a75604760c4da4caaa456c0c5895c061c3065c5a", "75df554a39f58accb7eb293b550fa59618674b7d");
 	$client->setAccessTokenType($client::ACCESS_TOKEN_QBOX, \QBox\SECRET_KEY, null);
 	$client->setAccessToken(\QBox\ACCESS_KEY);
 	return $client;
@@ -33,6 +33,7 @@ function exchangeRet($client, $response) {
 		if (empty($token)) {
 			return array(401, "");
 		}
+		$client->setAccessTokenType($client::ACCESS_TOKEN_BEARER);
 		$client->setAccessToken($token);
 	}
 	return array($code, $result);

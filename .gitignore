@@ -2,6 +2,8 @@
 *.o
 *.a
 *.so
+config.test.php
+demo_test.php
 
 # Folders
 _obj
