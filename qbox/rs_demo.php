@@ -4,10 +4,17 @@
 require('rs.php');
 require('client/rs.php');
 
+$QBOX_ACCESS_KEY = '<Please apply your access key>';
+$QBOX_SECRET_KEY = '<Dont send your secret key to anyone>';
+$QBOX_ACCESS_KEY = 'RLT1NBD08g3kih5-0v8Yi6nX6cBhesa2Dju4P7mT';
+$QBOX_SECRET_KEY = 'k6uZoSDAdKBXQcNYG3UOm4bP3spDVkTg-9hWHIKm';
+
+const DEMO_DOMAIN = 'iovip.qbox.me/bucket';
+
 $client = QBox\OAuth2\NewClient();
 
-$tblName = 'tblName';
-$rs = QBox\RS\NewService($client, $tblName);
+$bucket = 'bucket';
+$rs = QBox\RS\NewService($client, $bucket);
 
 list($code, $error) = $rs->Drop();
 echo "===> Drop bucket result:\n";
@@ -44,7 +51,7 @@ if ($code == 200) {
 	exit(-1);
 }
 
-list($result, $code, $error) = QBox\RS\PutFile($auth['url'], $tblName, $key, '', __FILE__, 'CustomData', array('key' => $key));
+list($result, $code, $error) = QBox\RS\PutFile($auth['url'], $bucket, $key, '', __FILE__, 'CustomData', array('key' => $key));
 echo "===> PutFile $key result:\n";
 if ($code == 200) {
 	var_dump($result);
@@ -54,7 +61,7 @@ if ($code == 200) {
 	exit(-1);
 }
 
-list($result, $code, $error) = QBox\RS\PutFile($auth['url'], $tblName, $key2, '', __FILE__, 'CustomData', array('key' => $key2));
+list($result, $code, $error) = QBox\RS\PutFile($auth['url'], $bucket, $key2, '', __FILE__, 'CustomData', array('key' => $key2));
 echo "===> PutFile $key2 result:\n";
 if ($code == 200) {
 	var_dump($result);
@@ -64,7 +71,7 @@ if ($code == 200) {
 	exit(-1);
 }
 
-list($code, $error) = $rs->Publish(QBox\DEMO_DOMAIN);
+list($code, $error) = $rs->Publish(DEMO_DOMAIN);
 echo "===> Publish result:\n";
 if ($code == 200) {
 	echo "Publish ok!\n";

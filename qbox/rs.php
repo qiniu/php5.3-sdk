@@ -24,34 +24,36 @@ class Service
 	 * 上传授权（生成一个短期有效的可匿名上传URL）
 	 */
 	public function PutAuth() {
-		$url = \QBox\IO_HOST . '/put-auth/';
+		$url = QBOX_IO_HOST . '/put-auth/';
 		return \QBox\OAuth2\Call($this->Conn, $url);
 	}
 
 	/**
-	 * func Put(key string, mimeType string, fp File, bytes int64, timeout int) => (data PutRet, code int, err Error)
+	 * func Put(key string, mimeType string, fp File, bytes int64) => (data PutRet, code int, err Error)
 	 * 上传一个流
 	 */
-	public function Put($key, $mimeType, $fp, $bytes, $timeout = \QBox\PUT_TIMEOUT) {
+	public function Put($key, $mimeType, $fp, $bytes) {
+		global $QBOX_PUT_TIMEOUT;
 		if ($mimeType === '') {
 			$mimeType = 'application/octet-stream';
 		}
 		$entryURI = $this->TableName . ':' . $key;
-		$url = \QBox\IO_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
-		return \QBox\OAuth2\CallWithBinary($this->Conn, $url, $fp, $bytes, $timeout);
+		$url = QBOX_IO_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
+		return \QBox\OAuth2\CallWithBinary($this->Conn, $url, $fp, $bytes, $QBOX_PUT_TIMEOUT);
 	}
 
 	/**
-	 * func PutFile(key string, mimeType string, localFile string, timeout int) => (data PutRet, code int, err Error)
+	 * func PutFile(key string, mimeType string, localFile string) => (data PutRet, code int, err Error)
 	 * 上传文件
 	 */
-	public function PutFile($key, $mimeType, $localFile, $timeout = \QBox\PUT_TIMEOUT) {
+	public function PutFile($key, $mimeType, $localFile) {
+		global $QBOX_PUT_TIMEOUT;
 		$fp = fopen($localFile, 'rb');
 		if (!$fp)
 			return array(null, -1, array('error' => 'open file failed'));
 		$fileStat = fstat($fp);
 		$fileSize = $fileStat['size'];
-		$result = $this->Put($key, $mimeType, $fp, $fileSize, $timeout);
+		$result = $this->Put($key, $mimeType, $fp, $fileSize, $QBOX_PUT_TIMEOUT);
 		fclose($fp);
 		return $result;
 	}
@@ -63,7 +65,7 @@ class Service
 	 */
 	public function Get($key, $attName) {
 		$entryURI = $this->TableName . ':' . $key;
-		$url = \QBox\RS_HOST . '/get/' . \QBox\Encode($entryURI);
+		$url = QBOX_RS_HOST . '/get/' . \QBox\Encode($entryURI);
 		if (!empty($attName)) {
 			$url = $url . '/attName/' . \QBox\Encode($attName);
 		}
@@ -98,7 +100,7 @@ class Service
 			}
 		}
 
-		$url = \QBox\RS_HOST . '/batch';
+		$url = QBOX_RS_HOST . '/batch';
 		return \QBox\OAuth2\CallWithParams($this->Conn, $url, $ops);
 	}
 	
@@ -108,7 +110,7 @@ class Service
 	 */
 	public function GetIfNotModified($key, $attName, $base) {
 		$entryURI = $this->TableName . ':' . $key;
-		$url = \QBox\RS_HOST . '/get/' . \QBox\Encode($entryURI) . '/attName/' . \QBox\Encode($attName) . '/base/' . $base;
+		$url = QBOX_RS_HOST . '/get/' . \QBox\Encode($entryURI) . '/attName/' . \QBox\Encode($attName) . '/base/' . $base;
 		return \QBox\OAuth2\Call($this->Conn, $url);
 	}
 
@@ -118,7 +120,7 @@ class Service
 	 */
 	public function Stat($key) {
 		$entryURI = $this->TableName . ':' . $key;
-		$url = \QBox\RS_HOST . '/stat/' . \QBox\Encode($entryURI);
+		$url = QBOX_RS_HOST . '/stat/' . \QBox\Encode($entryURI);
 		return \QBox\OAuth2\Call($this->Conn, $url);
 	}
 
@@ -127,7 +129,7 @@ class Service
 	 * 将本 Table 的内容作为静态资源发布。静态资源的url为：http://domain/key
 	 */
 	public function Publish($domain) {
-		$url = \QBox\RS_HOST . '/publish/' . \QBox\Encode($domain) . '/from/' . $this->TableName;
+		$url = QBOX_RS_HOST . '/publish/' . \QBox\Encode($domain) . '/from/' . $this->TableName;
 		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
 	}
 
@@ -136,7 +138,7 @@ class Service
 	 * 取消发布
 	 */
 	public function Unpublish($domain) {
-		$url = \QBox\RS_HOST . '/unpublish/' . \QBox\Encode($domain);
+		$url = QBOX_RS_HOST . '/unpublish/' . \QBox\Encode($domain);
 		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
 	}
 
@@ -146,7 +148,7 @@ class Service
 	 */
 	public function Delete($key) {
 		$entryURI = $this->TableName . ':' . $key;
-		$url = \QBox\RS_HOST . '/delete/' . \QBox\Encode($entryURI);
+		$url = QBOX_RS_HOST . '/delete/' . \QBox\Encode($entryURI);
 		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
 	}
 
@@ -155,7 +157,7 @@ class Service
 	 * 删除整个表（慎用！）
 	 */
 	public function Drop() {
-		$url = \QBox\RS_HOST . '/drop/' . $this->TableName;
+		$url = QBOX_RS_HOST . '/drop/' . $this->TableName;
 		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
 	}
 }

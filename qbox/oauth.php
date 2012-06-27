@@ -14,9 +14,10 @@ require_once('config.php');
  */
 function NewClient() {
 
-	$client = new \OAuth2\Client("a75604760c4da4caaa456c0c5895c061c3065c5a", "75df554a39f58accb7eb293b550fa59618674b7d");
-	$client->setAccessTokenType($client::ACCESS_TOKEN_QBOX, \QBox\SECRET_KEY, null);
-	$client->setAccessToken(\QBox\ACCESS_KEY);
+	global $QBOX_ACCESS_KEY, $QBOX_SECRET_KEY;
+	$client = new \OAuth2\Client('a75604760c4da4caaa456c0c5895c061c3065c5a', '75df554a39f58accb7eb293b550fa59618674b7d');
+	$client->setAccessTokenType($client::ACCESS_TOKEN_QBOX, $QBOX_SECRET_KEY, null);
+	$client->setAccessToken($QBOX_ACCESS_KEY);
 	return $client;
 }
 
@@ -91,8 +92,9 @@ function _ReadTokenData($filepath = QBOX_TOKEN_TMP_FILE){
  */
 function ExchangeByPassword($client, $user, $passwd, $devid = '') {
 
+	global $QBOX_TOKEN_ENDPOINT;
 	$params = array('username' => $user, 'password' => $passwd, 'device_id' => $devid);
-	$response = $client->getAccessToken(\QBox\TOKEN_ENDPOINT, 'password', $params);
+	$response = $client->getAccessToken($QBOX_TOKEN_ENDPOINT, 'password', $params);
 	return exchangeRet($client, $response);
 }
 
@@ -101,8 +103,9 @@ function ExchangeByPassword($client, $user, $passwd, $devid = '') {
  */
 function ExchangeByRefreshToken($client, $token) {
 
+	global $QBOX_TOKEN_ENDPOINT;
 	$params = array('refresh_token' => $token);
-	$response = $client->getAccessToken(\QBox\TOKEN_ENDPOINT, 'refresh_token', $params);
+	$response = $client->getAccessToken($QBOX_TOKEN_ENDPOINT, 'refresh_token', $params);
 	return exchangeRet($client, $response);
 }
 
