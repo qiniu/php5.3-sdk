@@ -29,29 +29,30 @@ class Service
 	}
 
 	/**
-	 * func Put(key string, mimeType string, fp File, bytes int64, timeout int) => (data PutRet, code int, err Error)
+	 * func Put(key string, mimeType string, fp File, bytes int64) => (data PutRet, code int, err Error)
 	 * 上传一个流
 	 */
-	public function Put($key, $mimeType, $fp, $bytes, $timeout = QBOX_PUT_TIMEOUT) {
+	public function Put($key, $mimeType, $fp, $bytes) {
+		global $QBOX_PUT_TIMEOUT;
 		if ($mimeType === '') {
 			$mimeType = 'application/octet-stream';
 		}
 		$entryURI = $this->TableName . ':' . $key;
 		$url = QBOX_IO_HOST . '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
-		return \QBox\OAuth2\CallWithBinary($this->Conn, $url, $fp, $bytes, $timeout);
+		return \QBox\OAuth2\CallWithBinary($this->Conn, $url, $fp, $bytes, $QBOX_PUT_TIMEOUT);
 	}
 
 	/**
-	 * func PutFile(key string, mimeType string, localFile string, timeout int) => (data PutRet, code int, err Error)
+	 * func PutFile(key string, mimeType string, localFile string) => (data PutRet, code int, err Error)
 	 * 上传文件
 	 */
-	public function PutFile($key, $mimeType, $localFile, $timeout = QBOX_PUT_TIMEOUT) {
+	public function PutFile($key, $mimeType, $localFile) {
 		$fp = fopen($localFile, 'rb');
 		if (!$fp)
 			return array(null, -1, array('error' => 'open file failed'));
 		$fileStat = fstat($fp);
 		$fileSize = $fileStat['size'];
-		$result = $this->Put($key, $mimeType, $fp, $fileSize, $timeout);
+		$result = $this->Put($key, $mimeType, $fp, $fileSize);
 		fclose($fp);
 		return $result;
 	}
