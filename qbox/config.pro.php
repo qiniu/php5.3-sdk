@@ -4,7 +4,7 @@ define('QBOX_REDIRECT_URI',           '<RedirectURL>');
 define('QBOX_AUTHORIZATION_ENDPOINT', '<AuthURL>');
 define('QBOX_TOKEN_ENDPOINT',         'https://acc.qbox.me/oauth2/token');
 
-define('QBOX_IO_HOST', 'http://io.qbox.me');
+define('QBOX_IO_HOST', 'http://iovip.qbox.me');
 define('QBOX_FS_HOST', 'https://fs.qbox.me');
 define('QBOX_RS_HOST', 'http://rs.qbox.me:10100');
 
