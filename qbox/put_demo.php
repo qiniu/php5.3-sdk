@@ -4,13 +4,16 @@
 require('rs.php');
 require('client/rs.php');
 
+# $QBOX_ACCESS_KEY = '<Please apply your access key>';
+# $QBOX_SECRET_KEY = '<Dont send your secret key to anyone>';
+
 $client = QBox\OAuth2\NewClient();
 
 $tblName = 'tblName';
 $rs = QBox\RS\NewService($client, $tblName);
 
-$key = '2.jpg';
-$localFile = '2.jpg';
+$key = 'put_demo.php';
+$localFile = __FILE__;
 
 list($result, $code, $error) = $rs->PutAuth();
 echo "===> PutAuth result:\n";
