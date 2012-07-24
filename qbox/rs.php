@@ -4,6 +4,7 @@ namespace QBox\RS;
 
 require_once('oauth.php');
 require_once('utils.php');
+require_once('fileop.php');
 
 /**
  * QBox Resource Storage (Key-Value) Service
@@ -102,7 +103,7 @@ class Service
 		$url = QBOX_RS_HOST . '/batch';
 		return \QBox\OAuth2\CallWithParams($this->Conn, $url, $ops);
 	}
-	
+
 	/**
 	 * func GetIfNotModified(key string, attName string, base string) => (data GetRet, code int, err Error)
 	 * 下载授权（生成一个短期有效的可匿名下载URL），如果服务端文件没被人修改的话（用于断点续传）
@@ -159,6 +160,35 @@ class Service
 		$url = QBOX_RS_HOST . '/drop/' . $this->TableName;
 		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
 	}
+
+    /**
+     * 图像处理接口（可持久化存储缩略图）
+     * func ImageMogrifyAs(<DestKey>, <SourceImageDownloadURL>, <opts>, <callbackFunc>) => Entry
+     * opts = {
+     *   "thumbnail": <ImageSizeGeometry>,
+     *   "gravity": <GravityType>, =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
+     *   "crop": <ImageSizeAndOffsetGeometry>,
+     *   "quality": <ImageQuality>,
+     *   "rotate": <RotateDegree>,
+     *   "format": <DestinationImageFormat>, =jpg, gif, png, tif, etc.
+     *   "auto_orient": <TrueOrFalse>
+     * }
+     */
+    public function ImageMogrifyAs($key, $source_img_url, $opts) {
+        $mogrifyParams = \QBox\FileOp\mkImageMogrifyParams($opts);
+        return $this->saveAs($key, $source_img_url, $mogrifyParams);
+    }
+
+    /**
+     * 持久化存储一个经过云端服务处理过后的资源
+     */
+    protected function saveAs($key, $source_url, $opWithParams) {
+        $entryURI = $this->TableName . ':' . $key;
+        $saveAsEntryURI = \QBox\Encode($entryURI);
+        $saveAsParam = "/save-as/" . $saveAsEntryURI;
+        $newurl = $source_url . '?' . $opWithParams . $saveAsParam;
+        return \QBox\OAuth2\Call($this->Conn, $newurl);
+    }
 }
 
 /**
@@ -168,4 +198,3 @@ class Service
 function NewService($conn, $tblName = '') {
 	return new Service($conn, $tblName);
 }
-

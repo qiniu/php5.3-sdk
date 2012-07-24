@@ -15,6 +15,15 @@ $rs = QBox\RS\NewService($client, $tblName);
 $key = 'put_demo.php';
 $localFile = __FILE__;
 
+list($code, $error) = $rs->Drop();
+echo "===> Drop bucket result:\n";
+if ($code == 200) {
+	echo "Drop ok!\n";
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "Drop failed: $code - $msg\n";
+}
+
 list($result, $code, $error) = $rs->PutAuth();
 echo "===> PutAuth result:\n";
 if ($code == 200) {
@@ -25,7 +34,7 @@ if ($code == 200) {
 	exit(-1);
 }
 
-list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key, '', $localFile, '', array('key' => $key));
+list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key, 'image/jpg', $localFile, '', array('key' => $key));
 echo "===> PutFile $key result:\n";
 if ($code == 200) {
 	var_dump($result);
