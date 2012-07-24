@@ -622,7 +622,7 @@ $thumbType
 
 `QBox\FileOp\ImageMogrifyPreviewURL()` 方法支持将一个存储在七牛云存储的图片进行缩略、裁剪、旋转和格式转化处理，该方法返回一个可以直接预览缩略图的URL。
 
-    $imageMogrifyPreviewURL = QBox\FileOp\ImageMogrifyPreviewURL()($src_img_url, $mogrify_options);
+    $imageMogrifyPreviewURL = QBox\FileOp\ImageMogrifyPreviewURL($src_img_url, $mogrify_options);
 
 **参数**
 
@@ -648,7 +648,7 @@ $mogrify_options
 
 <a name="ImageMogrifyAs"></a>
 
-### 3. 高级图像处理（缩略、裁剪、旋转、转化）并持久化存储处理结果
+### 4. 高级图像处理（缩略、裁剪、旋转、转化）并持久化存储处理结果
 
 `QBox\RS\Service()` 实例化对象的 `ImageMogrifyAs()` 方法支持将一个存储在七牛云存储的图片进行缩略、裁剪、旋转和格式转化处理，并且将处理后的缩略图作为一个新文件持久化存储到七牛云存储服务器上，这样就可以供后续直接使用而不用每次都传入参数进行图像处理。
 
