@@ -40,6 +40,12 @@ class UploadToken {
         $return_url = $this->_get("return_url");
         if ($return_url != "")
             $params["returnUrl"] = $return_url;
+        $customer = $this->_get("customer");
+        if ($customer != "")
+        	$params['customer'] = $customer;
+        $callbackBodyType = $this->_get("callbackBodyType");
+        if ($callbackBodyType != "")
+        	$params['callbackBodyType'] = $callbackBodyType;
         $this->signature = \QBox\Encode(json_encode($params));
     }
 
@@ -67,4 +73,13 @@ function NewUploadToken(array $opts)
     $tokenObj->set("return_url", $opts["return_url"]);
     return $tokenObj->generate_token();
 }
-
+function NewAuthPolicy(array $opts){
+	global $QBOX_ACCESS_KEY, $QBOX_SECRET_KEY;
+	$tokenObj = new UploadToken($QBOX_ACCESS_KEY, $QBOX_SECRET_KEY);
+	$tokenObj->set("scope", $opts["scope"]);
+	$tokenObj->set("expires_in", $opts["expires_in"]);
+	$tokenObj->set("callback_url", $opts["callback_url"]);
+	$tokenObj->set("customer", $opts["customer"]);
+	$tokenObj->set("callbackBodyType", $opts["callbackBodyType"]);	
+	return $tokenObj->generate_token();
+}
