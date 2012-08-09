@@ -9,13 +9,13 @@ class Service{
 	}
 	
 	public function get($customer){
-		$url = QBOX_WM_HOST . '/get';
+		$url = QBOX_WM_HOST . '/wmget';
 		$params = array("customer"=>$customer);
 		return \QBox\OAuth2\CallWithParams($this->Conn, $url, $params);
 	}
 	
 	public function set($customer, array $tpl){
-		$url = QBOX_WM_HOST . '/set';
+		$url = QBOX_WM_HOST . '/wmset';
 		$tpl['customer'] = $customer;
 		return \QBox\OAuth2\CallWithParams($this->Conn, $url, $tpl);
 	}
