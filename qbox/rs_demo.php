@@ -2,7 +2,7 @@
 <?php
 
 require('rs.php');
-require('uptoken.php');
+require('authtoken.php');
 require('client/rs.php');
 
 $QBOX_ACCESS_KEY = '<Please apply your access key>';
@@ -45,7 +45,8 @@ if ($code == 200) {
 	exit(-1);
 }
 
-$upToken = QBox\NewUptoken(array('expiresIn' => 3600));
+$upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
+echo time() . " ===> Uptoken: $upToken\n";
 
 list($result, $code, $error) = QBox\RS\UploadFile($upToken, $bucket, $key, '', __FILE__, 'CustomData', array('key' => $key));
 echo time() . " ===> PutFile $key result:\n";

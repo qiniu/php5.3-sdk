@@ -5,7 +5,7 @@ namespace QBox;
 require_once('config.php');
 require_once('utils.php');
 
-function NewUptoken(array $params)
+function MakeAuthToken(array $params)
 {
 	global $QBOX_ACCESS_KEY, $QBOX_SECRET_KEY;
 
@@ -14,6 +14,10 @@ function NewUptoken(array $params)
 		unset($params['expiresIn']);
 	} else {
 		$expiresIn = 3600;
+	}
+
+	if (!isset($params['scope'])) {
+		$params['scope'] = '';
 	}
 
 	$params['deadline'] = time() + $expiresIn;
