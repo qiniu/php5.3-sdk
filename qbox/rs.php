@@ -7,8 +7,8 @@ require_once('utils.php');
 require_once('fileop.php');
 
 /**
- * QBox Resource Storage (Key-Value) Service
- * QBox 资源存储(键值对)。基本特性为：每个账户可创建多个表，每个表包含多个键值对(Key-Value对)，Key是任意的字符串，Value是一个文件。
+ * Resource Storage (Key-Value) Service
+ * 资源存储(键值对)。基本特性为：每个账户可创建多个表，每个表包含多个键值对(Key-Value对)，Key是任意的字符串，Value是一个文件。
  */
 class Service
 {

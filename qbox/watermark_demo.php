@@ -11,8 +11,6 @@ $path = getcwd();
 $key = 'test.jpg';
 $demo_domain = "http://io.qbox.me:13004/wmbucket";
 
-
-
 $rs = QBox\RS\NewService($client, $bucket);
 
 
