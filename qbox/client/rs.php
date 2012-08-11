@@ -58,7 +58,7 @@ function UploadFile($upToken, $tblName, $key, $mimeType, $localFile, $customMeta
 		$params['params'] = $callbackParams;
 	}
 
-	$response = \QBox\ExecuteRequest(QBOX_UP_HOST + "/upload", $params, \QBox\HTTP_METHOD_POST);
+	$response = \QBox\ExecuteRequest(QBOX_UP_HOST . '/upload', $params, \QBox\HTTP_METHOD_POST);
 	//var_dump($response);
 
 	$code = $response['code'];
