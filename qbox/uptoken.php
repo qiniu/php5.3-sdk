@@ -9,7 +9,7 @@ function NewUptoken(array $params)
 {
 	global $QBOX_ACCESS_KEY, $QBOX_SECRET_KEY;
 
-	if isset($params['expiresIn']) {
+	if (isset($params['expiresIn'])) {
 		$expiresIn = $params['expiresIn'];
 		unset($params['expiresIn']);
 	} else {
