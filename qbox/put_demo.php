@@ -9,8 +9,8 @@ $QBOX_SECRET_KEY = '<Dont send your secret key to anyone>';
 
 $client = QBox\OAuth2\NewClient();
 
-$tblName = 'tblName';
-$rs = QBox\RS\NewService($client, $tblName);
+$bucketName = 'bucketName';
+$rs = QBox\RS\NewService($client, $bucketName);
 
 $key = 'put_demo.php';
 $localFile = __FILE__;
@@ -34,7 +34,7 @@ if ($code == 200) {
 	exit(-1);
 }
 
-list($result, $code, $error) = QBox\RS\PutFile($result['url'], $tblName, $key, 'image/jpg', $localFile, '', array('key' => $key));
+list($result, $code, $error) = QBox\RS\PutFile($result['url'], $bucketName, $key, 'image/jpg', $localFile, '', array('key' => $key));
 echo "===> PutFile $key result:\n";
 if ($code == 200) {
 	var_dump($result);
