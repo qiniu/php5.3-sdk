@@ -35,7 +35,7 @@ $friendName = 'rs_demo.php';
 $key2 = '000-default2';
 $friendName2 = 'rs_demo2.php';
 
-list($result, $code, $error) = $rs->PutFile($key, '', __FILE__);
+list($result, $code, $error) = $rs->PutFile2($key, '', __FILE__);
 echo time() . " ===> PutFile result:\n";
 if ($code == 200) {
 	var_dump($result);
