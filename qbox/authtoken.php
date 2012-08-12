@@ -16,10 +16,6 @@ function MakeAuthToken(array $params)
 		$expiresIn = 3600;
 	}
 
-	if (!isset($params['scope'])) {
-		$params['scope'] = '';
-	}
-
 	$params['deadline'] = time() + $expiresIn;
 	$signature = \QBox\Encode(json_encode($params));
 
