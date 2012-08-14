@@ -27,6 +27,6 @@ if ($code == 200) {
 	var_dump($tpl);
 } else {
 	$msg = QBox\ErrorMessage($code, $error);
-	echo "SetWatermark failed: $code - $msg\n";
+	echo "GetWatermark failed: $code - $msg\n";
 }
 
