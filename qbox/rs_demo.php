@@ -7,7 +7,6 @@ require('client/rs.php');
 
 $QBOX_ACCESS_KEY = '<Please apply your access key>';
 $QBOX_SECRET_KEY = '<Dont send your secret key to anyone>';
-
 const DEMO_DOMAIN = 'test.dn.qbox.me';
 
 echo time() . " ===> Start demo ...\n";
@@ -32,18 +31,17 @@ $friendName = 'rs_demo.php';
 $key2 = '000-default2';
 $friendName2 = 'rs_demo2.php';
 
-// list($result, $code, $error) = $rs->PutFile2($key, '', __FILE__);
-// echo time() . " ===> PutFile result:\n";
-// if ($code == 200) {
-// 	var_dump($result);
-// } else {
-// 	$msg = QBox\ErrorMessage($code, $error);
-// 	echo "PutFile failed: $code - $msg\n";
-// 	exit(-1);
-// }
+list($result, $code, $error) = $rs->PutFile2($key, '', __FILE__);
+echo time() . " ===> PutFile result:\n";
+if ($code == 200) {
+	var_dump($result);
+} else {
+	$msg = QBox\ErrorMessage($code, $error);
+	echo "PutFile failed: $code - $msg\n";
+	exit(-1);
+}
 
-//$upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
-$upToken = "iN7NgwM31j4-BZacMjPrOQBs34UG1maYCAQmhdCV:LvFLyajZJY1L2Kqd1cWlu5cmF8Q=:eyJkZWFkbGluZSI6MTM0ODc0NTE0M30=";
+$upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
 echo time() . " ===> Uptoken: $upToken\n";
 
 list($result, $code, $error) = QBox\RS\UploadFile($upToken, $bucket, $key, '', __FILE__, 'CustomData', array('key' => $key));
