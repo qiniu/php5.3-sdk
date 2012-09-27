@@ -38,7 +38,7 @@ function PutFile($url, $tblName, $key, $mimeType, $localFile, $customMeta = '', 
 
 /**
  * func UploadFile(upToken, key, mimeType, localFile, customMeta, callbackParams string) => (data PutRet, code int, err Error)
- * 匿名上传一个文件(上传用的临时 url 通过 $rs->PutAuth 得到)
+ * 通过uptoken上传一个文件
  */
 function UploadFile($upToken, $tblName, $key, $mimeType, $localFile, $customMeta = '', $callbackParams = '') {
 
