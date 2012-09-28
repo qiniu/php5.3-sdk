@@ -155,7 +155,7 @@ class Service
 
 	/**
 	 * func Publish(domain string) => (code int, err Error)
-	 * 将本 Table 的内容作为静态资源发布。静态资源的url为：http://domain/key
+	 * 将本 Bucket 的内容作为静态资源发布。静态资源的url为：http://domain/key
 	 */
 	public function Publish($domain) {
 		$url = QBOX_RS_HOST . '/publish/' . \QBox\Encode($domain) . '/from/' . $this->Bucket;
