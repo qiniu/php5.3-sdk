@@ -17,7 +17,9 @@ SDK样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://gi
 
 **云存储接口**
 
-- [新建资源表](#rs-NewService)
+- [Bucket (资源表) 管理](#Buckets)
+	- [新建 Bucket](#rs-Mkbucket)
+	- [列出所有 Bucket](#rs-Buckets)
 - [上传文件](#rs-PutFile)
 	- [获取用于上传文件的临时授权凭证](#generate-upload-token)
     - [服务端上传流程](#upload-server-side)
@@ -71,13 +73,17 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 
 ## 云存储接口
 
-<a name="rs-NewService"></a>
+<a name="Buckets"></a>
 
-### 1. 新建资源表
+### 1.Bucket (资源表) 管理
+
+<a name="rs-Mkbucket"></a>
+
+#### 1.1 新建 Bucket
 
 新建资源表的意义在于，您可以将所有上传的资源分布式加密存储在七牛云存储服务端后还能保持相应的完整映射索引。
 
-新建一份资源表，您只需在登录授权后实例化一个 QBox\RS\NewService() 即可，代码如下：
+要新建一份资源表，您需要在登录授权后实例化一个 QBox\RS\NewService()，然后用实例化对象去创建bucket。代码如下：
 
     require('qboxsdk/rs.php');
     require('qboxsdk/client/rs.php');
@@ -88,10 +94,39 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
     $client = QBox\OAuth2\NewClient();
 
     /**
-     * 然后，新建资源表只需在登录后实例化一个 QBox\RS\NewService() 对象即可
+     * 然后，需在登录后实例化一个 QBox\RS\NewService() 对象
      */
     $bucket = 'CustomBucketName';
     $rs = QBox\RS\NewService($client, $bucket);
+    
+    /**
+     *最后，通过该实例化对象把资源表建出来
+     */
+    list($code, $error) = $rs->Mkbucket($bucket); 
+    echo time() . " ===> Mkbucket result:\n";
+	if ($code == 200) {
+		echo "Mkbucket Success!\n";
+	} else {
+		$msg = QBox\ErrorMessage($code, $error);
+		echo "Buckets failed: $code - $msg\n";	
+	}
+	
+<a name="rs-Buckets"></a>
+#### 1.2 列出所有 Bucket
+要列出该用户的所有bucket只需要用上面实例化的 ` QBox\RS\NewService()` 对象调用 `Mkbucket()`。示例代码如下：
+		
+	/**
+	 *返回的结果$result 包含该用户拥有的所有bucket 的数组
+	 */
+	list($result, $code, $error) = $rs->Buckets();
+	echo time() . " ===> Bucukets result:\n";
+	if ($code == 200) {
+		var_dump($result);
+	} else {
+		$msg = QBox\ErrorMessage($code, $error);
+		echo "Buckets failed: $code - $msg\n";	
+	}
+ 
 
 <a name="rs-PutFile"></a>
 

@@ -170,7 +170,25 @@ class Service
 		$url = QBOX_RS_HOST . '/unpublish/' . \QBox\Encode($domain);
 		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
 	}
-
+	
+	/**
+	 * func Mkbucket($bucketName string) => ( code int, err Error)
+	 * 创建bucket
+	 */
+	public function Mkbucket($bucketName) {
+		$url = QBOX_RS_HOST . '/mkbucket/' . $bucketName;
+		return \QBox\OAuth2\CallNoRet($this->Conn, $url);
+	}
+	
+	/**
+	 * func Buckets() => array()
+	 * 列出所有的bucket
+	 */
+	public function Buckets() {
+		$url = QBOX_RS_HOST . '/buckets';
+		return \QBox\OAuth2\Call($this->Conn, $url);
+	}
+	
 	/**
 	 * func Delete(key string) => (code int, err Error)
 	 * 删除资源
