@@ -111,6 +111,8 @@ $ vim path/to/your_project/lib/qboxsdk/config.php
 		echo "Buckets failed: $code - $msg\n";	
 	}
 	
+开发者也可以事先登录[开发者网站](https://dev.qiniutek.com/buckets/new)后创建一个空间名称(bucket)。
+	
 <a name="rs-Buckets"></a>
 #### 1.2 列出所有 Bucket
 要列出该用户的所有bucket只需要用上面实例化的 ` QBox\RS\NewService()` 对象调用 `Mkbucket()`。示例代码如下：
