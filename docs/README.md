@@ -152,7 +152,8 @@ $params
 		‘expiresIn’=> <ExpiresInSeconds>,
 		‘callbackUrl’ => <CallbackUrl>,
 		‘callbackBodyType’ => <CallbackBodyType>,
-		‘customer’ => <EndUserId>
+		‘customer’ => <EndUserId>,
+		'escape' => <Escape>
 	)
 
 :scope
