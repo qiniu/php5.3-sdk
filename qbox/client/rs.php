@@ -40,7 +40,7 @@ function PutFile($url, $bucketName, $key, $mimeType, $localFile, $customMeta = '
  * func UploadFile(upToken, key, mimeType, localFile, customMeta, callbackParams string) => (data PutRet, code int, err Error)
  * 通过uptoken上传一个文件
  */
-function UploadFile($upToken, $bucketName, $key, $mimeType, $localFile, $customMeta = '', $callbackParams = '') {
+function UploadFile($upToken, $bucketName, $key, $mimeType, $localFile, $customMeta = '', $callbackParams = '', $rotate = '') {
 
 	if ($mimeType === '') {
 		$mimeType = 'application/octet-stream';
@@ -49,6 +49,9 @@ function UploadFile($upToken, $bucketName, $key, $mimeType, $localFile, $customM
 	$action = '/rs-put/' . \QBox\Encode($entryURI) . '/mimeType/' . \QBox\Encode($mimeType);
 	if ($customMeta !== '') {
 		$action .= '/meta/' . \QBox\Encode($customMeta);
+	}
+	if ($rotate !== '') {
+		$action .= '/rotate/' . $rotate;
 	}
 	$params = array('action' => $action, 'file' => "@$localFile", 'auth' => $upToken);
 	if ($callbackParams !== '') {
