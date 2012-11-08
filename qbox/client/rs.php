@@ -51,7 +51,7 @@ function UploadFile($upToken, $bucketName, $key, $mimeType, $localFile, $customM
 		$action .= '/meta/' . \QBox\Encode($customMeta);
 	}
 	if ($rotate !== '') {
-		$action .= '/rotate/' . \QBox\Encode($rotate);
+		$action .= '/rotate/' . $rotate;
 	}
 	$params = array('action' => $action, 'file' => "@$localFile", 'auth' => $upToken);
 	if ($callbackParams !== '') {
