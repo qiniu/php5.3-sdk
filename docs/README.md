@@ -170,6 +170,18 @@ $params
 :customer
 : 可选，字符串类型（String），客户方终端用户（End User）的ID，该字段可以用来标示一个文件的属主，这在一些特殊场景下（比如给终端用户上传的图片打上名字水印）非常有用。
 
+:escape
+:可选，数字类型，可选值 0 或者 1，缺省为 0 。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](http://docs.qiniutek.com/v3/api/words/#VarExpression)。
+当 `escape` 的值为 `1` 时，常见的转义语法如下：
+
+- 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据（[CallbackParams](http://docs.qiniutek.com/v3/api/io/#CallbackParams)）为：
+
+	`{foo: "bar", w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
+
+- 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据（[CallbackParams](http://docs.qiniutek.com/v3/api/io/#CallbackParams)）为：
+
+	`foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
+	
 **返回值**
 
 返回一个字符串类型（String）的用于上传文件用的临时授权 `upload_token`。
@@ -194,7 +206,8 @@ $params
 		'',		  		//可选，文件的 mime-type 值。
 		__FILE__, 		//本地文件可被读取的有效路径
 		'CustomData', 	//为文件添加备注信息。
-		array('key' => $key) //文件上传成功后，七牛云存储向客户方业务服务器发送的回调参数。
+		array('key' => $key), //文件上传成功后，七牛云存储向客户方业务服务器发送的回调参数。
+		''				//可选，数字类型，上传图片时专用，可针对图片上传后进行旋转。该参数值为 0 ：表示根据图像EXIF信息自动旋转；值为 1 : 右转90度；值为 2 :右转180度；值为 3 : 右转270度。
 	);
 	echo time() . " ===> PutFile $key result:\n";
 	if ($code == 200) {
