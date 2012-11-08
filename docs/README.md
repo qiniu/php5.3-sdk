@@ -148,12 +148,12 @@ $params
 `$params`的具体规格如下
 
 	$params = array(
-		'scope'            => $TargetBucket, 
-		'expiresIn'        => $ExpiresInSeconds,
-		'callbackUrl'      => $CallbackUrl,
-		'callbackBodyType' => $CallbackBodyType,
-		'customer'         => $EndUserId,
-		'escape'           => $EnableCallAPIOrNot
+		'scope'            => $targetBucket,
+		'expiresIn'        => $expiresInSeconds,
+		'callbackUrl'      => $callbackUrl,
+		'callbackBodyType' => $callbackBodyType,
+		'customer'         => $endUserId,
+		'escape'           => $enableCallAPIOrNot
 	)
 
 各个字段详解：
