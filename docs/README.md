@@ -6,9 +6,9 @@ title: PHP5.3 SDK | 七牛云存储
 
 此 SDK 适用于 PHP5.3 及其以上版本。
 
-SDK下载地址：[https://github.com/qiniu/php5.3-sdk/tags](https://github.com/qiniu/php5.3-sdk/tags)
+SDK下载地址：<https://github.com/qiniu/php5.3-sdk/tags>
 
-SDK样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://github.com/why404/qiniu-s3-php5.3-sdk-example)
+SDK样例程序下载：<https://github.com/qiniu/php5.3-sdk-example>
 
 **应用接入**
 
@@ -148,40 +148,37 @@ $params
 `$params`的具体规格如下
 
 	$params = array(
-		‘scope’ => <TargetBucket>, 
-		‘expiresIn’=> <ExpiresInSeconds>,
-		‘callbackUrl’ => <CallbackUrl>,
-		‘callbackBodyType’ => <CallbackBodyType>,
-		‘customer’ => <EndUserId>,
-		'escape' => <Escape>
+		'scope'            => $targetBucket,
+		'expiresIn'        => $expiresInSeconds,
+		'callbackUrl'      => $callbackUrl,
+		'callbackBodyType' => $callbackBodyType,
+		'customer'         => $endUserId,
+		'escape'           => $enableCallAPIOrNot
 	)
 
-:scope
-: 必须，字符串类型（String），设定文件要上传到的目标 `bucket`
+各个字段详解：
 
-:expiresIn
-: 可选，数字类型，用于设置上传 URL 的有效期，单位：秒，缺省为 3600 秒，即 1 小时后该上传链接不再有效（但该上传URL在其生成之后的59分59秒都是可用的）。
+字段名 | 类型 | 是否必须 | 说明
+----- | --- | ------- | ----
+scope | string | 是 | 一般指定文件要上传到的目标存储空间（Bucket）
+expiresIn | int | 是 | 定义 uploadToken 的失效时间，Unix时间戳，精确到秒。缺省为 3600 秒，即 1 小时后用此 uploadToken 上传不再有效（但上传操作在其uploadToken生成之后的59分59秒都是可用的）。
+callbackUrl | string | 否 | 定义文件上传完毕后，云存储服务端执行回调的远程URL
+callbackBodyType | string | 否 | 为执行远程回调指定Content-Type，比如可以是：application/x-www-form-urlencoded
+customer | string | 否 | 给上传的文件添加唯一属主标识，特殊场景下非常有用，比如根据终端用户标识给图片打水印
+escape | int | 可选 | 可选值 0 或者 1，缺省为 0。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](/v3/api/words/#VarExpression)。
 
-:callbackUrl
-: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端要回调客户方的业务服务器地址。
+<a name="escape-expression"></a>
 
-:callbackBodyType
-: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端向客户方的业务服务器发送回调请求的 `Content-Type`。
-
-:customer
-: 可选，字符串类型（String），客户方终端用户（End User）的ID，该字段可以用来标示一个文件的属主，这在一些特殊场景下（比如给终端用户上传的图片打上名字水印）非常有用。
-
-:escape
-:可选，数字类型，可选值 0 或者 1，缺省为 0 。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](http://docs.qiniutek.com/v3/api/words/#VarExpression)。
 当 `escape` 的值为 `1` 时，常见的转义语法如下：
 
-- 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据（[CallbackParams](http://docs.qiniutek.com/v3/api/io/#CallbackParams)）为：
+- 若 `callbackBodyType` 为 `application/json` 时，一个典型的自定义回调数据（[CallbackParams](/v3/api/io/#CallbackParams)）为：
 
-	`{foo: "bar", w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
+    `{foo: "bar", size: $(fsize), etag: $(etag), w: $(imageInfo.width), h: $(imageInfo.height), exif: $(exif)}`
 
-- 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据（[CallbackParams](http://docs.qiniutek.com/v3/api/io/#CallbackParams)）为：
+- 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据（[CallbackParams](/v3/api/io/#CallbackParams)）为：
 
-	`foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
+    `foo=bar&size=$(fsize)&etag=$(etag)&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
+
 	
 **返回值**
 
@@ -199,17 +196,15 @@ $params
     /**
      * 服务端直传文件
      */
-    $upToken = QBox\MakeAuthToken(array('expiresIn' => 3600));
-	list($result, $code, $error) = QBox\RS\UploadFile(
-		$upToken, 		//用于上传文件的临时授权凭证
-		$bucket,  		//该文件上传到的“资源表”
-		$key,	  		//该文件在“资源表”中的唯一标识
-		'',		  		//可选，文件的 mime-type 值。
-		__FILE__, 		//本地文件可被读取的有效路径
-		'CustomData', 	//为文件添加备注信息。
-		array('key' => $key), //文件上传成功后，七牛云存储向客户方业务服务器发送的回调参数。
-		''				//可选，数字类型，上传图片时专用，可针对图片上传后进行旋转。该参数值为 0 ：表示根据图像EXIF信息自动旋转；值为 1 : 右转90度；值为 2 :右转180度；值为 3 : 右转270度。
-	);
+    $upToken = QBox\MakeAuthToken(array('expiresIn' => 3600, …));
+	list($result, $code, $error) = QBox\RS\UploadFile($uploadToken,
+	                                                  $bucket,
+	                                                  $key,
+	                                                  $mimeType,
+	                                                  $localFile,
+	                                                  $customData
+	                                                  $callbackParams,
+	                                                  $rotate);
 	echo time() . " ===> PutFile $key result:\n";
 	if ($code == 200) {
 		var_dump($result);
@@ -218,6 +213,19 @@ $params
 		echo "PutFile failed: $code - $msg\n";
 		exit(-1);
 	}
+
+`QBox\RS\UploadFile()` 参数详解：
+
+参数 | 类型 | 是否必须 | 说明
+--- | ---- | ------ | -----
+`$uploadToken` | string | 是 | 用于上传文件的临时授权凭证
+`$bucket` | string | 是 | 指定该文件上传到的某个空间（“资源表”）
+`$key` | string | 是 | 该文件在某空间（“资源表”）中的唯一标识（ID）
+`$mimeType` | string | 否 | 文件的资源类型，可留空，缺省为 `application/octet-stream`
+`$localFile` | string | 是 | 本地文件可被读取的有效路径
+`$customData` | string | 否 | 为文件添加备注信息
+`$callbackParams` | string, array | 否 | 文件上传成功后，七牛云存储向客户方业务服务器发送的回调参数
+`$rotate` | int | 否 | 上传图片时专用，可针对图片上传后进行旋转。该参数值为 0 ：表示根据图像EXIF信息自动旋转；值为 1 : 右转90度；值为 2 :右转180度；值为 3 : 右转270度。
 
 <a name="upload-client-side"></a>
 
@@ -1153,7 +1161,7 @@ public/callback.php 源码如下：
 
 以上已经是一个比较完整的文件上传并执行相应的回调的操作流程，想必您对整个上传和回调处理流程已经有比较深刻的认知。如果有兴趣，您还可以下载以上样例的源代码进行深入的查阅。
 
-样例程序下载：[https://github.com/qiniu/php5.3-sdk-example](https://github.com/why404/qiniu-s3-php5.3-sdk-example)
+样例程序下载：<https://github.com/qiniu/php5.3-sdk-example>
 
 如果您需要对上传组件的界面风格和样式进行调整，请编辑 public/assets/js/fileprogress.js 和 public/assets/css/ 目录里边的相应css文件。
 
