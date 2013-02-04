@@ -117,66 +117,11 @@ escape
     `foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
 
 asyncOps
-:可选，指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开。
-asyncOps 预转示例参见如下说明。
-
-==上传==
-
-1. 假定 asyncOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"
-2. 以此生成带有预转功能的上传授权凭证（UploadToken）
-3. 向七牛云存储上传一个 aac 格式的音频文件
-4. 传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
-
-	* `avthumb/mp3/ar/44100/ab/32k`
-	* `avthumb/mp3/aq/6/ar/16000`
-
-==下载==
-
-依然可以通过 `http://<绑定域名>/<key>` 的形式下载：
-
-- `http://<bucket>.qiniudn.com/<key>?avthunm/mp3/ar/44100/ab/32k`
-- `http://<bucket>.qiniudn.com/<key>?avthumb/mp3/aq/6/ar/16000`
-
-如果之前上传已经成功做完预转，那么此次下载就不需要转换，将会直接下载预转后的结果文件。
-图片、视频预转类似，开发者需要熟悉七牛云存储 [图像处理接口](/v3/api/foimg/) 和 [音视频处理接口](/v3/api/avfmt/) 。
-
-注意：预转后的下载链接不一定是问号传参形式，如果预转指令有定义别名，同样可以使用别名的友好URL风格形式访问。
-
+:可选，字符串类型 （String), 用于设置文件上传成功后，执行指定的预转指令。参考 [uploadToken 之 asyncOps 说明](http://v3/api/io/#uploadToken-asyncOps)
 
 returnBody
-:可选，文件上传成功后，自定义从七牛云存储最终返回給终端程序（客户端）的回调参数，允许存在转义符号 $(VarExpression)
+: 可选，字符串类型（String），用于设置文件上传成功后，执行七牛云存储规定的回调API，并以 JSON 响应格式返回其执行结果。参考[uploadToken 之 returnBody 说明](http://v3/api/io/#uploadToken-returnBody)。
 
-`returnBody` 字段和 `escape` 有着显著区别。当 uploadToken 开启 `escape` 选项后，允许客户端程序自定义回调参数，回调参数中可包含请求七牛云存储规定的API——[VarExpression](/v3/api/words/#VarExpression)，并将API处理的结果以回调（callback）的方式发送給业务服务器。
-
-如果说 `escape` 是在文件上传成功后，是把回调七牛云存储指定API的处理结果返回給业务服务端。那么， `returnBody` 的设置则是把回调七牛API的处理结果返回給业务客户端。实事上的确如此，两者甚至可以并行。
-
-当給 uploadToken 设置 `returnBody` 字段后，`returnBody` 字段的值是一个标准的字符串，其值可包含请求七牛云存储规定的回调API（即 [VarExpression](/v3/api/words/#VarExpression)），并将回调API处理的结果以 JSON 格式作为 HTTP Response 返回給客户端程序。
-
-一个典型的包含七牛云存储指定回调API的 returnBody 字段声明如下：
-
-	authInfo["returnBody"] = `{
-    	"foo": "bar", 
-    	"size": $(fsize), 
-    	"hash": $(etag), 
-    	"w": $(imageInfo.width), 
-    	"h": $(imageInfo.height), 
-    	"color": $(exif.ColorSpace.val)
-	}`
-
-假使如上，当一个用户在 iOS 端用包含该 returnBody 字段的 uploadToken 成功上传一张图片，那么该 iOS 端程序将收到如下一段 HTTP Response 应答：
-
-	HTTP/1.1 200 OK
-	Content-Type: application/json
-	Cache-Control: no-store
-	Response Body: {
-    	"foo": "bar", 
-    	"size": 214513, 
-    	"hash": "Fh8xVqod2MQ1mocfI4S4KpRL6D98", 
-    	"w": 640,
-    	"h": 480,
-    	"color": "sRGB"
-	}
-七牛云存储指定的回调API参数可参考 [VarExpression](/v3/api/words/#VarExpression) 。
 
 **返回值**
 
