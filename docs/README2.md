@@ -6,7 +6,7 @@ title: PHP SDK 使用指南 | 七牛云存储
 
 此 PHP SDK 适用于 PHP5.3 版本，基于 [七牛云存储官方API](/v3/api/) 构建。使用此 SDK 构建您的网络应用程序，能让您以非常便捷地方式将数据安全地存储到七牛云存储上。无论您的网络应用是一个网站程序，还是包括从云端（服务端程序）到终端（手持设备应用）的架构的服务或应用，通过七牛云存储及其 SDK，都能让您应用程序的终端用户高速上传和下载，同时也让您的服务端更加轻盈。
 
-七牛云存储 PHP SDK 源码地址：<https://github.com/qiniu/php5.3-sdk> [![Build Status](https://travis-ci.org/rwifeng/php5.3-sdk.png?branch=b_rwf_travis)](https://travis-ci.org/rwifeng/php5.3-sdk)
+七牛云存储 PHP SDK 源码地址：<https://github.com/qiniu/php5.3-sdk>
 
 **目录**
 
@@ -82,26 +82,28 @@ title: PHP SDK 使用指南 | 七牛云存储
         ‘callbackUrl’        => $callbackUrl,
         ’callbackBodyType‘   => $callbackBodyType,
         ‘customer’           => $endUserId,
-        ’escape‘             => $allowUploadCallbackApi
+        ’escape‘             => $allowUploadCallbackApi,
+        'asyncOps'			  => $asyncOptions,
+        'returnBody'		  => $returnBody
     )
 **参数**
 
-:scope
+scope
 : 必须，字符串类型（String），设定文件要上传到的目标 `bucket`
 
-:expiresIn
+expiresIn
 : 可选，数字类型，用于设置上传 URL 的有效期，单位：秒，缺省为 3600 秒，即 1 小时后该上传链接不再有效（但该上传URL在其生成之后的59分59秒都是可用的）。
 
-:callbackUrl
-: 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端要回调客户方的业务服务器地址。
+callbackUrl
+ 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端要回调客户方的业务服务器地址。
 
-:callbackBodyType
+callbackBodyType
 : 可选，字符串类型（String），用于设置文件上传成功后，七牛云存储服务端向客户方的业务服务器发送回调请求的 `Content-Type`。
 
-:customer
+customer
 : 可选，字符串类型（String），客户方终端用户（End User）的ID，该字段可以用来标示一个文件的属主，这在一些特殊场景下（比如给终端用户上传的图片打上名字水印）非常有用。
 
-:escape
+escape
 : 可选，数字类型，可选值 0 或者 1，缺省为 0 。值为 1 表示 callback 传递的自定义数据中允许存在转义符号 `$(VarExpression)`，参考 [VarExpression](/v3/api/words/#VarExpression)。
 
 当 `escape` 的值为 `1` 时，常见的转义语法如下：
@@ -113,6 +115,68 @@ title: PHP SDK 使用指南 | 七牛云存储
 - 若 `callbackBodyType` 为 `application/x-www-form-urlencoded` 时，一个典型的自定义回调数据（[CallbackParams](/v3/api/io/#CallbackParams)）为：
 
     `foo=bar&w=$(imageInfo.width)&h=$(imageInfo.height)&exif=$(exif)`
+
+asyncOps
+:可选，指定文件（图片/音频/视频）上传成功后异步地执行指定的预转操作。每个预转指令是一个API规格字符串，多个预转指令可以使用分号“;”隔开。
+asyncOps 预转示例参见如下说明。
+
+==上传==
+
+1. 假定 asyncOps = "avthumb/mp3/ar/44100/ab/32k;avthumb/mp3/aq/6/ar/16000"
+2. 以此生成带有预转功能的上传授权凭证（UploadToken）
+3. 向七牛云存储上传一个 aac 格式的音频文件
+4. 传成功后，服务器会对这个 aac 音频文件异步地做如下两个预转操作
+
+	* `avthumb/mp3/ar/44100/ab/32k`
+	* `avthumb/mp3/aq/6/ar/16000`
+
+==下载==
+
+依然可以通过 `http://<绑定域名>/<key>` 的形式下载：
+
+- `http://<bucket>.qiniudn.com/<key>?avthunm/mp3/ar/44100/ab/32k`
+- `http://<bucket>.qiniudn.com/<key>?avthumb/mp3/aq/6/ar/16000`
+
+如果之前上传已经成功做完预转，那么此次下载就不需要转换，将会直接下载预转后的结果文件。
+图片、视频预转类似，开发者需要熟悉七牛云存储 [图像处理接口](/v3/api/foimg/) 和 [音视频处理接口](/v3/api/avfmt/) 。
+
+注意：预转后的下载链接不一定是问号传参形式，如果预转指令有定义别名，同样可以使用别名的友好URL风格形式访问。
+
+
+returnBody
+:可选，文件上传成功后，自定义从七牛云存储最终返回給终端程序（客户端）的回调参数，允许存在转义符号 $(VarExpression)
+
+`returnBody` 字段和 `escape` 有着显著区别。当 uploadToken 开启 `escape` 选项后，允许客户端程序自定义回调参数，回调参数中可包含请求七牛云存储规定的API——[VarExpression](/v3/api/words/#VarExpression)，并将API处理的结果以回调（callback）的方式发送給业务服务器。
+
+如果说 `escape` 是在文件上传成功后，是把回调七牛云存储指定API的处理结果返回給业务服务端。那么， `returnBody` 的设置则是把回调七牛API的处理结果返回給业务客户端。实事上的确如此，两者甚至可以并行。
+
+当給 uploadToken 设置 `returnBody` 字段后，`returnBody` 字段的值是一个标准的字符串，其值可包含请求七牛云存储规定的回调API（即 [VarExpression](/v3/api/words/#VarExpression)），并将回调API处理的结果以 JSON 格式作为 HTTP Response 返回給客户端程序。
+
+一个典型的包含七牛云存储指定回调API的 returnBody 字段声明如下：
+
+	authInfo["returnBody"] = `{
+    	"foo": "bar", 
+    	"size": $(fsize), 
+    	"hash": $(etag), 
+    	"w": $(imageInfo.width), 
+    	"h": $(imageInfo.height), 
+    	"color": $(exif.ColorSpace.val)
+	}`
+
+假使如上，当一个用户在 iOS 端用包含该 returnBody 字段的 uploadToken 成功上传一张图片，那么该 iOS 端程序将收到如下一段 HTTP Response 应答：
+
+	HTTP/1.1 200 OK
+	Content-Type: application/json
+	Cache-Control: no-store
+	Response Body: {
+    	"foo": "bar", 
+    	"size": 214513, 
+    	"hash": "Fh8xVqod2MQ1mocfI4S4KpRL6D98", 
+    	"w": 640,
+    	"h": 480,
+    	"color": "sRGB"
+	}
+七牛云存储指定的回调API参数可参考 [VarExpression](/v3/api/words/#VarExpression) 。
 
 **返回值**
 
@@ -476,13 +540,13 @@ $mogrify_options
 `$mogrify_options` 对象具体的规格如下：
 
     $mogrify_options = array(
+        "auto_orient"=> <TrueOrFalse>    
         "thumbnail"  => <ImageSizeGeometry>,
         "gravity"    => <GravityType>, =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
         "crop"       => <ImageSizeAndOffsetGeometry>,
         "quality"    => <ImageQuality>,
         "rotate"     => <RotateDegree>,
         "format"     => <DestinationImageFormat>, =jpg, gif, png, tif, etc.
-        "auto_orient"=> <TrueOrFalse>
     );
 
 `QBox\FileOp\ImageMogrifyPreviewURL()` 方法是对七牛云存储图像处理高级接口的完整包装，关于 `$mogrify_options` 参数里边的具体含义和使用方式，可以参考文档：[图像处理高级接口](#/v2/api/foimg/#fo-imageMogr)。
@@ -524,13 +588,13 @@ $mogrify_options
 `$mogrify_options` 对象具体的规格如下：
 
     $mogrify_options = array(
+        "auto_orient"  => <TrueOrFalse>    
         "thumbnail"    => <ImageSizeGeometry>,
         "gravity"      => <GravityType>, =NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
         "crop"         => <ImageSizeAndOffsetGeometry>,
         "quality"      => <ImageQuality>,
         "rotate"       => <RotateDegree>,
         "format"       => <DestinationImageFormat>, =jpg, gif, png, tif, etc.
-        "auto_orient"  => <TrueOrFalse>
     );
 
 `QBox\RS\Service()` 实例化对象的 `ImageMogrifyAs()` 方法是对七牛云存储图像处理高级接口的完整包装，关于 `$mogrify_options` 参数里边的具体含义和使用方式，可以参考文档：[图像处理高级接口](#/v2/api/foimg/#fo-imageMogr)。
@@ -576,7 +640,7 @@ $mogrify_options
 
 ## 许可证
 
-Copyright (c) 2012 qiniutek.com
+Copyright (c) 2012-2013 qiniutek.com
 
 基于 MIT 协议发布:
 
