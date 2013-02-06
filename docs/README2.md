@@ -1,12 +1,12 @@
 ---
-title: PHP SDK 使用指南 | 七牛云存储
+title: PHP5.3 SDK 使用指南 | 七牛云存储
 ---
 
-# PHP SDK 使用指南
+# PHP5.3 SDK 使用指南
 
-此 PHP SDK 适用于 PHP5.3 版本，基于 [七牛云存储官方API](/v3/api/) 构建。使用此 SDK 构建您的网络应用程序，能让您以非常便捷地方式将数据安全地存储到七牛云存储上。无论您的网络应用是一个网站程序，还是包括从云端（服务端程序）到终端（手持设备应用）的架构的服务或应用，通过七牛云存储及其 SDK，都能让您应用程序的终端用户高速上传和下载，同时也让您的服务端更加轻盈。
+此 PHP5.3 SDK 适用于 PHP5.3 版本，基于 [七牛云存储官方API](/v3/api/) 构建。使用此 SDK 构建您的网络应用程序，能让您以非常便捷地方式将数据安全地存储到七牛云存储上。无论您的网络应用是一个网站程序，还是包括从云端（服务端程序）到终端（手持设备应用）的架构的服务或应用，通过七牛云存储及其 SDK，都能让您应用程序的终端用户高速上传和下载，同时也让您的服务端更加轻盈。
 
-七牛云存储 PHP SDK 源码地址：<https://github.com/qiniu/php5.3-sdk>
+七牛云存储 PHP5.3 SDK 源码地址：<https://github.com/qiniu/php5.3-sdk>
 
 **目录**
 
@@ -257,7 +257,7 @@ expiresIn
 : 可选，数字类型，用于设置上传 URL 的有效期，单位：秒，缺省为 3600 秒，即 1 小时后该上传链接不再有效。
 
 pattern
-: 可选，字符串类型，用于设置可匹配的下载链接。参考：[downloadToken pattern 详解](/v3/api/io/#download-token-pattern)
+: 必选，字符串类型，用于设置可匹配的下载链接。参考：[downloadToken pattern 详解](/v3/api/io/#download-token-pattern)
 
 
 <a name="other-download-features"></a>
