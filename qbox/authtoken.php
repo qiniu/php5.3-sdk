@@ -27,3 +27,28 @@ function MakeAuthToken(array $params)
 	return "$QBOX_ACCESS_KEY:$encoded_digest:$signature";
 }
 
+function MakeDownloadToken(array $params)
+{
+	global $QBOX_ACCESS_KEY, $QBOX_SECRET_KEY;
+
+	if (isset($params['expiresIn'])) {
+		$expiresIn = $params['expiresIn'];
+		unset($params['expiresIn']);
+	} else {
+		$expiresIn = 3600;
+	}
+	$params["E"] = time() + $expiresIn;
+
+	if (isset($params['pattern'])) {
+		$params["S"] = $params['pattern'];
+		unset($params['pattern']);
+	}
+
+	error_log(print_r($params, true));
+
+	$scope = \QBox\Encode(json_encode($params));
+	$checksum = hash_hmac('sha1', $scope, $QBOX_SECRET_KEY, true);
+	$encoded_checksum = \QBox\Encode($checksum);
+
+	return "$QBOX_ACCESS_KEY:$encoded_checksum:$scope";
+}
